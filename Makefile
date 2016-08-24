@@ -1,5 +1,5 @@
 all: lex.yy.c
-	gcc $< -lfl
- 
+	gcc $< -lfl 
+
 lex.yy.c: lexical.l
 	flex $<

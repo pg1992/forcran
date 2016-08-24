@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "syntactic.tab.h"
 %}
 
 WHITE [\t\n ]
@@ -19,42 +20,52 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 "!"([^\n])*\n {
 	yytext[strlen(yytext)-1] = 0;
 	printf("'%s' : COMMENT\n", yytext);
+	return COMMENT;
 }
 
 "(" {
 	printf("'%s' : OPEN_PARENS\n", yytext);
+	return OPEN_PARENS;
 }
 
 ")" {
 	printf("'%s' : CLOSE_PARENS\n", yytext);
+	return CLOSE_PARENS;
 }
 
 "{" {
 	printf("'%s' : OPEN_BRACKET\n", yytext);
+	return OPEN_BRACKET;
 }
 
 "}" {
 	printf("'%s' : CLOSE_BRACKET\n", yytext);
+	return CLOSE_BRACKET;
 }
 
 "::" {
 	printf("'%s' : VAR_DEF_SEPARATOR\n", yytext);
+	return VAR_DEF_SEPARATOR;
 }
 
 "," {
 	printf("'%s' : COMMA\n", yytext);
+	return COMMA;
 }
 
 "**" {
 	printf("'%s' : POWER\n", yytext);
+	return POWER;
 }
 
 "*" {
 	printf("'%s' : TIMES\n", yytext);
+	return TIMES;
 }
 
 "+" {
 	printf("'%s' : PLUS\n", yytext);
+	return PLUS;
 }
 
 "-" {
