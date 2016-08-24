@@ -17,6 +17,10 @@
 		
 %%
 
+int yyerror(char *s){
+	printf("%s\n", s);
+}
+
 int main(void){
 	yyparse();
 }

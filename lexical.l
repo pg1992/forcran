@@ -139,8 +139,6 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 
 %%
 
-int main(void)
-{
-	yylex();
+yywrap(){
 	return 0;
 }
