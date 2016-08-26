@@ -70,71 +70,92 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 
 "-" {
 	printf("'%s' : MINUS\n", yytext);
+	return MINUS;
 }
 
 "/" {
-	printf("'%s' : SLASH\n", yytext);
+	printf("'%s' : DIVIDE\n", yytext);
+	return DIVIDE;
 }
 
 "^" {
 	printf("'%s' : POWER\n", yytext);
+	return POWER;
 }
 
 "=" {
 	printf("'%s' : EQUAL\n", yytext);
+	return EQUAL;
 }
 
-"'"([^'\n])*"'" {
+"'"([^'])*"'" {
 	yytext = yytext + 1;
 	yytext[strlen(yytext)-1] = 0;
 	printf("'%s' : STRING\n", yytext);
+	return STRING;
 }
 
 "implicit" {
 	printf("'%s' : IMPLICIT\n", yytext);
+	return IMPLICIT;
 }
 
 "none" {
 	printf("'%s' : NONE\n", yytext);
+	return NONE;
 }
 
 "parameter" {
 	printf("'%s' : PARAMETER\n", yytext);
+	return PARAMETER;
 }
 
 "write" {
 	printf("'%s' : WRITE_COMMAND\n", yytext);
+	return WRITE_COMMAND;
 }
 
 "read" {
 	printf("'%s' : READ_COMMAND\n", yytext);
+	return READ_COMMAND;
 }
 
 "real" {
 	printf("'%s' : REAL_KEYWORD\n", yytext);
+	return REAL_KEYWORD;
 }
 
 "program" {
 	printf("'%s' : PROGRAM_KEYWORD\n", yytext);
+	return PROGRAM_KEYWORD;
 }
 
 "end" {
 	printf("%s : END_KEYWORD\n", yytext);
+	return END_KEYWORD;
 }
 "integer" {
 	printf("'%s' : INTEGER_KEYWORD\n", yytext);
+	return INTEGER_KEYWORD;
 }
 
 {REAL} {
 	printf("'%.5g' : REAL_NUM\n", atof(yytext));
+	return REAL_NUM;
 }
 
 {INTEGER} {
 	printf("'%i' : INT_NUM\n", atoi(yytext));
+	return INT_NUM;
 }
 
 [a-z][a-z0-9_]* {
 	printf("'%s' : IDENTIFIER\n", yytext);
+	return IDENTIFIER;
+}
+
+. {
+	printf("%s : CARACTER BIZONHO\n", yytext);
 }
 
 %%
