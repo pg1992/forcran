@@ -13,7 +13,7 @@
 %token COMMA
 %token SEMICOLON
 %token IMPLICIT NONE PARAMETER
-%token READ_COMMAND WRITE_COMMAND
+%token READ_COMMAND WRITE_COMMAND PRINT_COMMAND
 %token PROGRAM_KEYWORD END_KEYWORD
 %token INTEGER_KEYWORD REAL_KEYWORD
 %token INT_NUM REAL_NUM
@@ -29,19 +29,24 @@ CommandList:
 Command:
 	BeginProg
 	| EndProg
+	| PrintStmt
 	| WriteStmt
 	| Declaration
 Declaration:
-	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {printf("int %s;\n", $3);}
-	| REAL_KEYWORD  VAR_DEF_SEPARATOR IDENTIFIER {printf("double %s;\n", $3);}
+//	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {printf("int %s;\n", $3);}
+//	| REAL_KEYWORD  VAR_DEF_SEPARATOR IDENTIFIER {printf("double %s;\n", $3);}
+PrintStmt: 
+	PRINT_COMMAND FormatPrint STRING {printf("  printf(\"%s\");\n", $3);}
+FormatPrint:
+	TIMES COMMA
 WriteStmt:
-	WRITE_COMMAND Format STRING {printf("printf(\"%s\");\n", $3);}
-Format:
+	WRITE_COMMAND FormatWrite STRING {printf("  printf(\"%s\");\n", $3);}
+FormatWrite:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
 BeginProg:
-	PROGRAM_KEYWORD IDENTIFIER {printf("int main(void) {\n");}
+	PROGRAM_KEYWORD IDENTIFIER {printf("int main(void) {\n\n");}
 EndProg:
-	END_KEYWORD PROGRAM_KEYWORD IDENTIFIER {printf("}\n");}
+	END_KEYWORD PROGRAM_KEYWORD IDENTIFIER {printf("\n}\n");}
 
 %%
 
@@ -49,12 +54,13 @@ int yyerror(char *s){
 	printf("%s\n", s);
 }
 
-int main(void){
+int main(void){ 
+
 	printf("#include <stdio.h>\n");
 	printf("#include <stdlib.h>\n");
 	printf("#include <string.h>\n");
 	printf("#include <math.h>\n\n");
-
+	
 	yyparse();
 }
 
