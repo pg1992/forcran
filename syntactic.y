@@ -34,6 +34,8 @@ Command:
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {printf("int %s;\n", $3);}
 	| REAL_KEYWORD  VAR_DEF_SEPARATOR IDENTIFIER {printf("double %s;\n", $3);}
+	| INTEGER_KEYWORD IDENTIFIER {printf("int %s;\n", $2);}
+	| REAL_KEYWORD IDENTIFIER {printf("double %s;\n", $2);}
 WriteStmt:
 	WRITE_COMMAND Format STRING {printf("printf(\"%s\");\n", $3);}
 Format:
