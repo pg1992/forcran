@@ -13,7 +13,7 @@
 %token COMMA
 %token SEMICOLON
 %token IMPLICIT NONE PARAMETER
-%token READ_COMMAND WRITE_COMMAND
+%token READ_COMMAND WRITE_COMMAND PRINT_COMMAND
 %token PROGRAM_KEYWORD END_KEYWORD
 %token INTEGER_KEYWORD REAL_KEYWORD
 %token INT_NUM REAL_NUM
@@ -30,6 +30,7 @@ Command:
 	BeginProg
 	| EndProg
 	| WriteStmt
+	| PrintStmt
 	| Declaration
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {printf("int %s;\n", $3);}
@@ -37,9 +38,13 @@ Declaration:
 	| INTEGER_KEYWORD IDENTIFIER {printf("int %s;\n", $2);}
 	| REAL_KEYWORD IDENTIFIER {printf("double %s;\n", $2);}
 WriteStmt:
-	WRITE_COMMAND Format STRING {printf("printf(\"%s\");\n", $3);}
-Format:
+	WRITE_COMMAND FormatWrite STRING {printf("printf(\"%s\");\n", $3);}
+FormatWrite:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
+PrintStmt:
+	PRINT_COMMAND FormatPrint STRING {printf("printf(\"%s\");\n", $3);}
+FormatPrint:
+	TIMES COMMA
 BeginProg:
 	PROGRAM_KEYWORD IDENTIFIER {printf("int main(void) {\n");}
 EndProg:

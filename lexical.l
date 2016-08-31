@@ -8,7 +8,7 @@
 %}
 
 WHITE [\t ]
-LETTER [a-z]
+LETTER [a-zA-Z]
 DIGIT [0-9]
 NUMBER [0-9]+
 SIGN ("+"|"-")?
@@ -122,6 +122,10 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return PARAMETER;
 }
 
+"print" {
+	return PRINT_COMMAND;
+}
+
 "write" {
 	//printf("'%s' : WRITE_COMMAND\n", yytext);
 	return WRITE_COMMAND;
@@ -161,7 +165,7 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return INT_NUM;
 }
 
-[a-z][a-z0-9_]* {
+[a-z][a-zA-Z0-9_]* {
 	//printf("'%s' : IDENTIFIER\n", yytext);
 	yylval = yytext;
 	return IDENTIFIER;
