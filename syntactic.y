@@ -38,7 +38,7 @@ void add_var (struct varlist * vl, const char * const this_type, char * this_nam
 %token COMMA
 %token SEMICOLON
 %token IMPLICIT NONE PARAMETER
-%token READ_COMMAND WRITE_COMMAND
+%token READ_COMMAND WRITE_COMMAND PRINT_COMMAND
 %token PROGRAM_KEYWORD END_KEYWORD
 %token INTEGER_KEYWORD REAL_KEYWORD
 %token INT_NUM REAL_NUM
@@ -56,6 +56,7 @@ Command:
 	| EndProg
 	| WriteStmt
 	| ReadStmt
+	| PrintStmt
 	| Declaration
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
@@ -70,15 +71,33 @@ Declaration:
 		printf("double %s;\n", tmp);
 		add_var(&vars, "real", tmp);
 	}
+	| INTEGER_KEYWORD IDENTIFIER {
+		char tmp[128];
+		sprintf(tmp, "%s", $2);
+		printf("int %s;\n", tmp);
+		add_var(&vars, "int", tmp);
+	}
+	| REAL_KEYWORD IDENTIFIER {
+		char tmp[128];
+			sprintf(tmp, "%s", $2);
+		printf("double %s;\n", tmp);
+		add_var(&vars, "real", tmp);
+	}
 WriteStmt:
-	WRITE_COMMAND Format STRING {printf("printf(\"%s\");\n", $3);}
+	WRITE_COMMAND FormatWrite STRING {printf("printf(\"%s\");\n", $3);}
 ReadStmt:
-	READ_COMMAND Format VarList
+	READ_COMMAND FormatRead VarList
 VarList:
 	IDENTIFIER {}
 	| VarList COMMA IDENTIFIER
-Format:
+FormatWrite:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
+FormatRead:
+	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
+PrintStmt:
+	PRINT_COMMAND FormatPrint STRING {printf("printf(\"%s\");\n", $3);}
+FormatPrint:
+	TIMES COMMA
 BeginProg:
 	PROGRAM_KEYWORD IDENTIFIER {printf("int main(void) {\n");}
 EndProg:
