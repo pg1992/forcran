@@ -4,7 +4,7 @@ run: forcran
 	@echo -e "Arquivo .f90:\n"
 	@cat ex.f90
 	@echo -e "\nArquivo .c gerado:\n"
-	./forcran < ex.f90 | indent
+	./forcran < ex.f90
 
 forcran: lex.yy.c syntactic.tab.c
 	gcc -o forcran syntactic.tab.c lex.yy.c -lm -lfl
