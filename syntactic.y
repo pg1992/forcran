@@ -26,7 +26,7 @@ void add_var (struct varlist * vl, const char * const this_type, char * this_nam
 	vl->size++;
 }
 
-void get_var(struct varlist *vl, const char * const this_type, 
+struct var_node *get_var(struct varlist *vl, const char * const this_type, 
 	         char *this_name, char *search_param){
 	struct var_node *cur = vl -> head;
 
