@@ -25,6 +25,19 @@ void add_var (struct varlist * vl, const char * const this_type, char * this_nam
 	cur->next = NULL;
 	vl->size++;
 }
+
+void get_var(struct varlist *vl, const char * const this_type, 
+	         char *this_name, char *search_param){
+	struct var_node *cur = vl -> head;
+
+	while(strcmp(cur -> name, search_param) != 0 && cur != NULL){
+		cur = cur -> next;
+	}
+	strcpy(cur->type, this_type);
+	strcpy(cur->name, this_name);
+
+	return cur;
+}
 %}
 
 %token EOL
@@ -110,7 +123,7 @@ int yyerror(char *s){
 }
 
 int main(void){
-	struct var_node * cur = vars.head;
+	struct var_node *cur = vars.head;
 
 	printf("#include <stdio.h>\n");
 	printf("#include <stdlib.h>\n");
@@ -121,8 +134,7 @@ int main(void){
 
 	printf("Número de variáveis: %i\n", vars.size);
 
-	while(cur != NULL)
-	{
+	while(cur != NULL){
 		printf("\nNome: %s\n", cur->name);
 		printf("\nTipo: %s\n", cur->type);
 		cur = cur->next;
