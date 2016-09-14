@@ -16,13 +16,20 @@ struct varlist {
 
 void add_var (struct varlist * vl, const char * const this_type, char * this_name)
 {
-	struct var_node * cur = vl->head;
-	while (cur != NULL)
-		cur = cur->next;
-	cur = (struct var_node *)malloc(sizeof(struct var_node));
-	strcpy(cur->type, this_type);
-	strcpy(cur->name, this_name);
-	cur->next = NULL;
+	struct var_node * cur_node = (struct var_node *)malloc(sizeof(struct var_node));
+
+	strcpy(cur_node->type, this_type);
+	strcpy(cur_node->name, this_name);
+	cur_node->next = NULL;
+
+	if (vl->head == NULL)
+		vl->head = cur_node;
+	else
+	{
+		struct var_node * cur;
+		for (cur = vl->head; cur->next != NULL; cur = cur->next) ;
+		cur->next = cur_node;
+	}
 	vl->size++;
 }
 
@@ -71,6 +78,7 @@ Command:
 	| ReadStmt
 	| PrintStmt
 	| Declaration
+	| Assignment
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
 		char tmp[128];
@@ -92,10 +100,17 @@ Declaration:
 	}
 	| REAL_KEYWORD IDENTIFIER {
 		char tmp[128];
-			sprintf(tmp, "%s", $2);
+		sprintf(tmp, "%s", $2);
 		printf("double %s;\n", tmp);
 		add_var(&vars, "real", tmp);
 	}
+Assignment:
+	IntegerAssign
+	| RealAssign
+IntegerAssign:
+	IDENTIFIER EQUAL INT_NUM
+RealAssign:
+	IDENTIFIER EQUAL REAL_NUM
 WriteStmt:
 	WRITE_COMMAND FormatWrite STRING {printf("printf(\"%s\");\n", $3);}
 ReadStmt:
@@ -123,7 +138,6 @@ int yyerror(char *s){
 }
 
 int main(void){
-	struct var_node *cur = vars.head;
 
 	printf("#include <stdio.h>\n");
 	printf("#include <stdlib.h>\n");
@@ -131,13 +145,6 @@ int main(void){
 	printf("#include <math.h>\n\n");
 
 	yyparse();
-
 	printf("Número de variáveis: %i\n", vars.size);
-
-	while(cur != NULL){
-		printf("\nNome: %s\n", cur->name);
-		printf("\nTipo: %s\n", cur->type);
-		cur = cur->next;
-	}
 }
 
