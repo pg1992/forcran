@@ -115,6 +115,7 @@ Declaration:
 	}
 Expression:
 	INT_NUM {$$=$1;}
+	| IDENTIFIER {$$=$1;}
 	| REAL_NUM {$$=$1;}
 	| Expression PLUS Expression {$$=$1 + $3;}
 	| Expression MINUS Expression {$$=$1 - $3;}
