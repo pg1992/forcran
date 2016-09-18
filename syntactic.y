@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 struct var_node {
 	char type[10];
@@ -64,6 +65,13 @@ struct var_node *get_var(struct varlist *vl, const char * const this_type,
 %token INT_NUM REAL_NUM
 %token IDENTIFIER STRING
 
+
+
+%left PLUS MINUS
+%left TIMES DIVIDE
+%left NEG
+%right POWER
+
 %%
 
 CommandList:
@@ -79,6 +87,7 @@ Command:
 	| PrintStmt
 	| Declaration
 	| Assignment
+	| Expression
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
 		char tmp[128];
@@ -104,9 +113,22 @@ Declaration:
 		printf("double %s;\n", tmp);
 		add_var(&vars, "real", tmp);
 	}
+Expression:
+	INT_NUM {$$=$1;}
+	| REAL_NUM {$$=$1;}
+	| Expression PLUS Expression {$$=$1 + $3;}
+	| Expression MINUS Expression {$$=$1 - $3;}
+	| Expression TIMES Expression {$$=$1 * $3;}
+	| Expression DIVIDE Expression {$$=$1 / $3;}
+	| MINUS Expression %prec NEG { $$=-$2; }
+	| Expression POWER Expression {$$=pow($1,$3);}
+	| OPEN_PARENS Expression CLOSE_PARENS {$$=$2;}
 Assignment:
-	IntegerAssign
-	| RealAssign
+	IntegerAssign {printf("%s", $1);}
+	| RealAssign {printf("%s", $1);}
+	| ExpressionAssign {printf("%s", $1);}
+ExpressionAssign:
+	IDENTIFIER EQUAL Expression
 IntegerAssign:
 	IDENTIFIER EQUAL INT_NUM
 RealAssign:
