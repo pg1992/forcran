@@ -64,6 +64,10 @@ struct var_node *get_var(struct varlist *vl, const char * const this_type,
 %token INTEGER_KEYWORD REAL_KEYWORD
 %token INT_NUM REAL_NUM
 %token IDENTIFIER STRING
+%token IF_KEYWORD ELSE_KEYWORD
+%token EQUAL_KEYWORD
+%token END_IF_KEYWORD
+%token THEN_KEYWORD
 
 
 
@@ -88,6 +92,22 @@ Command:
 	| Declaration
 	| Assignment
 	| Expression
+	| Conditional
+
+Conditional:
+	IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD ConditionScope END_KEYWORD IF_KEYWORD
+
+ConditionScope:
+	Conditional
+	| Declaration
+	| Assignment
+
+ConditionStmt:
+	IDENTIFIER EQUAL_KEYWORD IDENTIFIER
+	| IDENTIFIER EQUAL_KEYWORD NumberStmt
+NumberStmt:
+	INT_NUM
+	| REAL_NUM
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
 		char tmp[128];
@@ -117,13 +137,13 @@ Expression:
 	INT_NUM {$$=$1;}
 	| IDENTIFIER {$$=$1;}
 	| REAL_NUM {$$=$1;}
+	| OPEN_PARENS Expression CLOSE_PARENS{$$=$2;}
 	| Expression PLUS Expression {$$=$1 + $3;}
 	| Expression MINUS Expression {$$=$1 - $3;}
 	| Expression TIMES Expression {$$=$1 * $3;}
 	| Expression DIVIDE Expression {$$=$1 / $3;}
-	| MINUS Expression %prec NEG { $$=-$2; }
-	| Expression POWER Expression {$$=pow($1,$3);}
-	| OPEN_PARENS Expression CLOSE_PARENS {$$=$2;}
+	| MINUS Expression %prec NEG { $$=-$2;}
+
 Assignment:
 	IntegerAssign {printf("%s", $1);}
 	| RealAssign {printf("%s", $1);}
@@ -152,7 +172,7 @@ FormatPrint:
 BeginProg:
 	PROGRAM_KEYWORD IDENTIFIER {printf("int main(void) {\n");}
 EndProg:
-	END_KEYWORD PROGRAM_KEYWORD IDENTIFIER {printf("}\n");}
+	END_KEYWORD PROGRAM_KEYWORD IDENTIFIER {printf("\n}\n");}
 
 %%
 

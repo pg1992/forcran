@@ -10,5 +10,12 @@ program exemplo
 	x = y + 3
 	x = y - 2
 	x = y * 2
-	x = y / 2
+	x = 2 / 2
+	w = -(4 + 2)
+	x = (2 + 2) / y
+	x = (3 + 5) + (8 * 2)
+	if(x .eq. 2) then
+		y = 8.2
+	end if
+
 end program exemplo

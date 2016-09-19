@@ -99,6 +99,18 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return EQUAL;
 }
 
+"then" {
+	return THEN_KEYWORD;
+}
+
+"if" {
+	return IF_KEYWORD;
+}
+
+".eq." {
+	return EQUAL_KEYWORD;
+}
+
 "'"([^'])*"'" {
 	yytext = yytext + 1;
 	yytext[strlen(yytext)-1] = 0;
