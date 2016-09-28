@@ -24,6 +24,6 @@ program exemplo
 	x = (2 + 2) / y
 	x = (3 + 5) + (8 * 2)
 
-	if (x .eq. 2) then
-	end if
+	!if (x .eq. 2) then
+	!end if
 end program exemplo

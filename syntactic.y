@@ -5,6 +5,7 @@
 #include <math.h>
 
 enum {REAL, INT} type_declaration;
+int recur_count = 0;
 
 struct var_node {
 	char type[4];
@@ -239,13 +240,16 @@ ExpressionAssign:
 
 WriteStmt:
 	WRITE_COMMAND FormatWrite STRING {
-		printf("printf(\"%s\\n\");\n", $3);
+		printf("printf(\"%s%s\");\n", $3, recur_count != 0 ? "\\n" : " ");
+		recur_count = 0;
 	}
 	| WRITE_COMMAND FormatWrite REAL_NUM {
-		printf("printf(\"%s\\n\");\n", $3);
+		printf("printf(\"%%lf%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
+		recur_count = 0;
 	}
 	| WRITE_COMMAND FormatWrite INT_NUM {
-		printf("printf(\"%s\\n\");\n", $3);
+		printf("printf(\"%%d%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
+		recur_count = 0;
 	}
 	| WRITE_COMMAND FormatWrite IDENTIFIER {
 		char type[4];
@@ -256,16 +260,20 @@ WriteStmt:
 		if (get_var_type(&vars, var_name, type) < 0)
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
 		else
-			printf("printf(\"%%%s\\n\", %s);\n", type, var_name);
+			printf("printf(\"%%%s%s\", %s);\n", type, recur_count != 0 ? "\\n" : " ", var_name);
+		recur_count = 0;
 	}
 	| WriteStmt COMMA STRING {
-		printf("printf(\"%s\\n\");\n", $3);
+		printf("printf(\"%s%s\");\n", $3, recur_count != 0 ? "\\n" : " ");
+		recur_count++;
 	}
 	| WriteStmt COMMA REAL_NUM {
-		printf("printf(\"%s\\n\");\n", $3);
+		printf("printf(\"%%lf%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
+		recur_count++;
 	}
 	| WriteStmt COMMA INT_NUM {
-		printf("printf(\"%s\\n\");\n", $3);
+		printf("printf(\"%%d%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
+		recur_count++;
 	}
 	| WriteStmt COMMA  IDENTIFIER {
 		char type[4];
@@ -276,7 +284,8 @@ WriteStmt:
 		if (get_var_type(&vars, var_name, type) < 0)
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
 		else
-			printf("printf(\"%%%s\\n\", %s);\n", type, var_name);
+			printf("printf(\"%%%s%s\", %s);\n", type, recur_count != 0 ? "\\n" : " ", var_name);
+		recur_count++;
 	}
 
 ReadStmt:
