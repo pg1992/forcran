@@ -123,6 +123,8 @@ ConditionStmt:
 	}
 	| Expression EQUAL_KEYWORD Expression {
 		char tmp[512];
+		strtok($1, ".eq.");
+		strtok($3, ")");
 		sprintf(tmp, "%s == %s", $1, $3);
 		$$ = strdup(tmp);
 	}
@@ -194,33 +196,33 @@ Expression:
 	}
 	| OPEN_PARENS Expression CLOSE_PARENS{
 		char tmp[512];
-		sprintf(tmp, "(%s)", $2);
-		$$ = strdup(tmp);
+		//sprintf(tmp, "(%s)", $2);
+		//$$ = strdup(tmp);
 	}
 	| Expression PLUS Expression {
 		char tmp[512];
-		sprintf(tmp, "%s + %s", $1, $3);
-		$$ = strdup(tmp);
+		//sprintf(tmp, "%s %s", $1, $3);
+		//$$ = strdup(tmp);
 	}
 	| Expression MINUS Expression {
 		char tmp[512];
-		sprintf(tmp, "%s - %s", $1, $3);
-		$$ = strdup(tmp);
+		//sprintf(tmp, "%s - %s", $1, $3);
+		//$$ = strdup(tmp);
 	}
 	| Expression TIMES Expression {
 		char tmp[512];
-		sprintf(tmp, "%s * %s", $1, $3);
-		$$ = strdup(tmp);
+		//sprintf(tmp, "%s * %s", $1, $3);
+		//$$ = strdup(tmp);
 	}
 	| Expression DIVIDE Expression {
 		char tmp[512];
-		sprintf(tmp, "%s / %s", $1, $3);
-		$$ = strdup(tmp);
+		//sprintf(tmp, "%s / %s", $1, $3);
+		//$$ = strdup(tmp);
 	}
 	| MINUS Expression %prec NEG {
 		char tmp[512];
-		sprintf(tmp, "- %s", $2);
-		$$ = strdup(tmp);
+		//sprintf(tmp, "- %s", $2);
+		//$$ = strdup(tmp);
 	}
 
 Assignment:
@@ -315,7 +317,7 @@ int main(int argc, char *argv[]){
 
 	yyparse();
 
-	if (argc > 1)
+		if (argc > 1)
 		if (strcmp(argv[1], "-d") == 0)
 			debug = 1;
 
