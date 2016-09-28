@@ -30,6 +30,10 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return COMMENT;
 }
 
+"'" {
+	return QUOTE;
+}
+
 "(" {
 	//printf("'%s' : OPEN_PARENS\n", yytext);
 	return OPEN_PARENS;
@@ -64,6 +68,11 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return SEMICOLON;
 }
 
+"^" {
+	//printf("'%s' : POWER\n", yytext);
+	return POWER;
+}
+
 "**" {
 	//printf("'%s' : POWER\n", yytext);
 	return POWER;
@@ -87,11 +96,6 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 "/" {
 	//printf("'%s' : DIVIDE\n", yytext);
 	return DIVIDE;
-}
-
-"^" {
-	//printf("'%s' : POWER\n", yytext);
-	return POWER;
 }
 
 "=" {
