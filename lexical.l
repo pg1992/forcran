@@ -107,6 +107,14 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return IF_KEYWORD;
 }
 
+".true." {
+	return TRUE_KEYWORD;
+}
+
+".false." {
+	return FALSE_KEYWORD;
+}
+
 ".eq." {
 	return EQUAL_KEYWORD;
 }
@@ -169,11 +177,13 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 
 {REAL} {
 	//printf("'%.5g' : REAL_NUM\n", atof(yytext));
+	yylval = yytext;
 	return REAL_NUM;
 }
 
 {INTEGER} {
 	//printf("'%i' : INT_NUM\n", atoi(yytext));
+	yylval = yytext;
 	return INT_NUM;
 }
 
