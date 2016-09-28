@@ -63,7 +63,8 @@ get_var_type (
 
 %token EOL
 %token NUMBER
-%token PLUS MINUS TIMES DIVIDE POWER
+%token POWER
+%token PLUS MINUS TIMES DIVIDE
 %token EQUAL
 %token OPEN_PARENS CLOSE_PARENS
 %token OPEN_BRACKET CLOSE_BRACKET
@@ -81,8 +82,10 @@ get_var_type (
 %token EQUAL_KEYWORD
 %token END_IF_KEYWORD
 %token THEN_KEYWORD
+
 %token TRUE_KEYWORD
 %token FALSE_KEYWORD
+%token QUOTE
 
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -181,15 +184,11 @@ Declaration:
 			yyerror();
 		}
 	}
-
 Expression:
-	INT_NUM {
+	numbers_type {
 		$$=$1;
 	}
 	| IDENTIFIER {
-		$$=$1;
-	}
-	| REAL_NUM {
 		$$=$1;
 	}
 	| OPEN_PARENS Expression CLOSE_PARENS{
@@ -235,20 +234,25 @@ ExpressionAssign:
 	IDENTIFIER EQUAL Expression
 
 WriteStmt:
-	WRITE_COMMAND FormatWrite STRING {
-		printf("printf(\"%s\\n\");\n", $3);
+	WRITE_COMMAND FormatWrite PrintPossibilities
+	| WriteStmt COMMA PrintPossibilities
+
+PrintStmt: 
+	PRINT_COMMAND FormatPrint PrintPossibilities 
+	| PrintStmt COMMA PrintPossibilities
+
+PrintPossibilities:
+	STRING {
+		printf("printf(\"%s\\n\");\n", $1);
 	}
-	| WRITE_COMMAND FormatWrite REAL_NUM {
-		printf("printf(\"%s\\n\");\n", $3);
+	| numbers_type {
+		printf("printf(\"%s\\n\");\n", $1);
 	}
-	| WRITE_COMMAND FormatWrite INT_NUM {
-		printf("printf(\"%s\\n\");\n", $3);
-	}
-	| WRITE_COMMAND FormatWrite IDENTIFIER {
+	| IDENTIFIER {
 		char type[4];
 		char var_name[128];
 
-		strcpy(var_name, $3);
+		strcpy(var_name, $1);
 
 		if (get_var_type(&vars, var_name, type) < 0)
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
@@ -283,20 +287,31 @@ ReadStmt:
 FormatWrite:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
 
+numbers_type:
+	INT_NUM
+	| REAL_NUM
+
+NumbersAssign:
+	IDENTIFIER EQUAL numbers_type
+
+ReadStmt:
+	READ_COMMAND FormatRead VarList
+
 FormatRead:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
 
-PrintStmt:
-	PRINT_COMMAND FormatPrint STRING {printf("printf(\"%s\");\n", $3);}
-
 FormatPrint:
 	TIMES COMMA
+
+VarList:
+	IDENTIFIER {}
+	| VarList COMMA IDENTIFIER
 
 BeginProg:
 	PROGRAM_KEYWORD IDENTIFIER EOL IMPLICIT NONE {printf("int main(void) {\n");}
 
 EndProg:
-	END_KEYWORD PROGRAM_KEYWORD IDENTIFIER {printf("\n}\n");}
+	END_KEYWORD PROGRAM_KEYWORD IDENTIFIER {printf("\nreturn 0;\n}\n");}
 
 %%
 
