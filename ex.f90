@@ -1,3 +1,4 @@
+! teste
 program exemplo
 	implicit none
 	integer :: x, i ; real :: z
@@ -9,7 +10,7 @@ program exemplo
 	write(*,*) 'Teste 2\n' ; write(*,*) 'Teste 3\n\n\n'
 	print *, 'Um teste para o print'
 
-	write(*,*) x
+	write(*,*) x, y, 'Pedro Guilherme'
 	read(*,*) y
 	write(*,*) y
 	write(*,*) 3.2e-4
@@ -23,6 +24,6 @@ program exemplo
 	x = (2 + 2) / y
 	x = (3 + 5) + (8 * 2)
 
-	if (x .eq. y) then
+	if (x .eq. 2) then
 	end if
 end program exemplo

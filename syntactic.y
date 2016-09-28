@@ -98,6 +98,9 @@ CommandList:
 
 Command:
 	/* Empty */
+	| COMMENT {
+		printf("//%s\n", $1);
+	}
 	| BeginProg
 	| EndProg
 	| WriteStmt
@@ -219,7 +222,7 @@ Expression:
 	}
 	| MINUS Expression %prec NEG {
 		char tmp[512];
-		sprintf(tmp, "- %s", $2);
+		sprintf(tmp, "-%s", $2);
 		$$ = strdup(tmp);
 	}
 
@@ -245,6 +248,26 @@ WriteStmt:
 		printf("printf(\"%s\\n\");\n", $3);
 	}
 	| WRITE_COMMAND FormatWrite IDENTIFIER {
+		char type[4];
+		char var_name[128];
+
+		strcpy(var_name, $3);
+
+		if (get_var_type(&vars, var_name, type) < 0)
+			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
+		else
+			printf("printf(\"%%%s\\n\", %s);\n", type, var_name);
+	}
+	| WriteStmt COMMA STRING {
+		printf("printf(\"%s\\n\");\n", $3);
+	}
+	| WriteStmt COMMA REAL_NUM {
+		printf("printf(\"%s\\n\");\n", $3);
+	}
+	| WriteStmt COMMA INT_NUM {
+		printf("printf(\"%s\\n\");\n", $3);
+	}
+	| WriteStmt COMMA  IDENTIFIER {
 		char type[4];
 		char var_name[128];
 
@@ -328,12 +351,5 @@ int main(int argc, char *argv[]){
 		for (cur = vars.head ; cur != NULL ; cur = cur->next)
 			printf("\tType: %s\n\tName: %s\n\n", cur->type, cur->name);
 	}
-
-	//char type[4];
-	//struct var_node *search = vars.head->next->next->next->next->next;
-	//if (get_var_type(&vars, search->name, type) < 0)
-	//	printf("Error!!\n");
-	//else
-	//	printf("Search var: %s\nType: %s\n", search->name, type);
 }
 
