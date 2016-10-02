@@ -111,6 +111,7 @@ Command:
 Conditional:
 	IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD ConditionScope END_KEYWORD IF_KEYWORD {
 		printf("if (%s) {\n", $3);
+		//printf("%s\n", $6);
 		printf("}\n");
 	}
 
@@ -123,17 +124,21 @@ ConditionStmt:
 	}
 	| Expression EQUAL_KEYWORD Expression {
 		char tmp[512];
+		char aux[100];
 		strtok($1, ".eq.");
-		strtok($3, ")");
-		sprintf(tmp, "%s == %s", $1, $3);
-		$$ = strdup(tmp);
+		strcpy(aux, $3);
+		strtok(aux, ")");
+		sprintf(tmp, "%s == %s", $1, aux);
+		//$$ = strdup(tmp);
+		strcpy($$, tmp);
 	}
 
 ConditionScope:
 	/* Empty */
-	EOL {
+	|EOL ConditionScope{
 		
 	}
+	| Assignment ConditionScope
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
