@@ -23,11 +23,15 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return EOL;
 }
 
-"!".*\n {
-	yytext[strlen(yytext)-1] = 0;
+"!"([^\n])* {
 	yytext++;
+	yylval = yytext;
 	//printf("'%s' : COMMENT\n", yytext);
 	return COMMENT;
+}
+
+"'" {
+	return QUOTE;
 }
 
 "(" {
@@ -64,6 +68,11 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return SEMICOLON;
 }
 
+"^" {
+	//printf("'%s' : POWER\n", yytext);
+	return POWER;
+}
+
 "**" {
 	//printf("'%s' : POWER\n", yytext);
 	return POWER;
@@ -87,11 +96,6 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 "/" {
 	//printf("'%s' : DIVIDE\n", yytext);
 	return DIVIDE;
-}
-
-"^" {
-	//printf("'%s' : POWER\n", yytext);
-	return POWER;
 }
 
 "=" {
@@ -170,6 +174,7 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	//printf("%s : END_KEYWORD\n", yytext);
 	return END_KEYWORD;
 }
+
 "integer" {
 	//printf("'%s' : INTEGER_KEYWORD\n", yytext);
 	return INTEGER_KEYWORD;

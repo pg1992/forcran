@@ -3,67 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "functions.c"
 
 enum {REAL, INT} type_declaration;
+int recur_count = 0;
 
-struct var_node {
-	char type[4];
-	char name[128];
-	struct var_node *next;
-};
-
-struct varlist {
-	int size;
-	struct var_node *head;
-} vars = {0, NULL};
-
-void
-add_var (
-	struct varlist * vl,
-	const char * const this_type,
-	char * this_name
-)
-{
-	struct var_node * cur_node = (struct var_node *)malloc(sizeof(struct var_node));
-
-	strcpy(cur_node->type, this_type);
-	strcpy(cur_node->name, this_name);
-	cur_node->next = NULL;
-
-	if (vl->head == NULL)
-		vl->head = cur_node;
-	else
-	{
-		struct var_node * cur;
-		for (cur = vl->head; cur->next != NULL; cur = cur->next) ;
-		cur->next = cur_node;
-	}
-	vl->size++;
-}
-
-int
-get_var_type (
-	struct varlist *vl,
-	char *search_param,
-	char *this_type
-)
-{
-	struct var_node *cur = vl -> head;
-
-	for (cur = vl->head ; cur->next != NULL && strcmp(search_param, cur->name) != 0; cur = cur->next) ;
-
-	if (strcmp(cur->name, search_param) != 0)
-		return -1;
-
-	strcpy(this_type, cur->type);
-
-	return 0;
-}
 %}
 
 %token EOL
 %token NUMBER
-%token PLUS MINUS TIMES DIVIDE POWER
+%token POWER
+%token PLUS MINUS TIMES DIVIDE
 %token EQUAL
 %token OPEN_PARENS CLOSE_PARENS
 %token OPEN_BRACKET CLOSE_BRACKET
@@ -81,8 +31,10 @@ get_var_type (
 %token EQUAL_KEYWORD
 %token END_IF_KEYWORD
 %token THEN_KEYWORD
+
 %token TRUE_KEYWORD
 %token FALSE_KEYWORD
+%token QUOTE
 
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -98,11 +50,13 @@ CommandList:
 
 Command:
 	/* Empty */
+	| COMMENT {
+		printf("//%s\n", $1);
+	}
 	| BeginProg
 	| EndProg
 	| WriteStmt
 	| ReadStmt
-	| PrintStmt
 	| Declaration
 	| Assignment
 	| Expression
@@ -190,13 +144,10 @@ Declaration:
 	}
 
 Expression:
-	INT_NUM {
+	numbers_type {
 		$$=$1;
 	}
 	| IDENTIFIER {
-		$$=$1;
-	}
-	| REAL_NUM {
 		$$=$1;
 	}
 	| OPEN_PARENS Expression CLOSE_PARENS{
@@ -243,13 +194,16 @@ ExpressionAssign:
 
 WriteStmt:
 	WRITE_COMMAND FormatWrite STRING {
-		printf("printf(\"%s\\n\");\n", $3);
+		printf("printf(\"%s%s\");\n", $3, recur_count != 0 ? "\\n" : " ");
+		recur_count = 0;
 	}
 	| WRITE_COMMAND FormatWrite REAL_NUM {
-		printf("printf(\"%s\\n\");\n", $3);
+		printf("printf(\"%%lf%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
+		recur_count = 0;
 	}
 	| WRITE_COMMAND FormatWrite INT_NUM {
-		printf("printf(\"%s\\n\");\n", $3);
+		printf("printf(\"%%d%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
+		recur_count = 0;
 	}
 	| WRITE_COMMAND FormatWrite IDENTIFIER {
 		char type[4];
@@ -260,7 +214,32 @@ WriteStmt:
 		if (get_var_type(&vars, var_name, type) < 0)
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
 		else
-			printf("printf(\"%%%s\\n\", %s);\n", type, var_name);
+			printf("printf(\"%%%s%s\", %s);\n", type, recur_count != 0 ? "\\n" : " ", var_name);
+		recur_count = 0;
+	}
+	| WriteStmt COMMA STRING {
+		printf("printf(\"%s%s\");\n", $3, recur_count != 0 ? "\\n" : " ");
+		recur_count++;
+	}
+	| WriteStmt COMMA REAL_NUM {
+		printf("printf(\"%%lf%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
+		recur_count++;
+	}
+	| WriteStmt COMMA INT_NUM {
+		printf("printf(\"%%d%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
+		recur_count++;
+	}
+	| WriteStmt COMMA IDENTIFIER {
+		char type[4];
+		char var_name[128];
+
+		strcpy(var_name, $3);
+
+		if (get_var_type(&vars, var_name, type) < 0)
+			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
+		else
+			printf("printf(\"%%%s%s\", %s);\n", type, recur_count != 0 ? "\\n" : " ", var_name);
+		recur_count++;
 	}
 
 ReadStmt:
@@ -290,20 +269,31 @@ ReadStmt:
 FormatWrite:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
 
+numbers_type:
+	INT_NUM
+	| REAL_NUM
+
+NumbersAssign:
+	IDENTIFIER EQUAL numbers_type
+
+ReadStmt:
+	READ_COMMAND FormatRead VarList
+
 FormatRead:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
 
-PrintStmt:
-	PRINT_COMMAND FormatPrint STRING {printf("printf(\"%s\");\n", $3);}
-
 FormatPrint:
 	TIMES COMMA
+
+VarList:
+	IDENTIFIER {}
+	| VarList COMMA IDENTIFIER
 
 BeginProg:
 	PROGRAM_KEYWORD IDENTIFIER EOL IMPLICIT NONE {printf("int main(void) {\n");}
 
 EndProg:
-	END_KEYWORD PROGRAM_KEYWORD IDENTIFIER {printf("\n}\n");}
+	END_KEYWORD PROGRAM_KEYWORD IDENTIFIER {printf("\nreturn 0;\n}\n");}
 
 %%
 
@@ -335,12 +325,5 @@ int main(int argc, char *argv[]){
 		for (cur = vars.head ; cur != NULL ; cur = cur->next)
 			printf("\tType: %s\n\tName: %s\n\n", cur->type, cur->name);
 	}
-
-	//char type[4];
-	//struct var_node *search = vars.head->next->next->next->next->next;
-	//if (get_var_type(&vars, search->name, type) < 0)
-	//	printf("Error!!\n");
-	//else
-	//	printf("Search var: %s\nType: %s\n", search->name, type);
 }
 
