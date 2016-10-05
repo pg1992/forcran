@@ -57,6 +57,7 @@ Command:
 	| EndProg
 	| WriteStmt
 	| ReadStmt
+	| PrintStmt
 	| Declaration
 	| Assignment
 	| Expression
@@ -192,54 +193,42 @@ Assignment:
 ExpressionAssign:
 	IDENTIFIER EQUAL Expression
 
+PrintStmt:
+	PRINT_COMMAND FormatPrint	PrintPossibilities {
+		recur_count = 0;
+	}
+	|	PrintStmt COMMA PrintPossibilities {
+		recur_count++;
+	}
+
 WriteStmt:
-	WRITE_COMMAND FormatWrite STRING {
-		printf("printf(\"%s%s\");\n", $3, recur_count != 0 ? "\\n" : " ");
+	WRITE_COMMAND FormatWrite PrintPossibilities {
 		recur_count = 0;
 	}
-	| WRITE_COMMAND FormatWrite REAL_NUM {
-		printf("printf(\"%%lf%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
-		recur_count = 0;
+	| WriteStmt COMMA PrintPossibilities {
+		recur_count++;
 	}
-	| WRITE_COMMAND FormatWrite INT_NUM {
-		printf("printf(\"%%d%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
-		recur_count = 0;
+
+PrintPossibilities:
+	STRING {
+		printf("printf(\"%s%s\");\n", $1, recur_count != 0 ? "\\n" : " ");
 	}
-	| WRITE_COMMAND FormatWrite IDENTIFIER {
+	|	REAL_NUM {
+		printf("printf(\"%%lf%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $1);
+	}
+	|	INT_NUM {
+		printf("printf(\"%%d%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $1);
+	}
+	|	IDENTIFIER {
 		char type[4];
 		char var_name[128];
 
-		strcpy(var_name, $3);
+		strcpy(var_name, $1);
 
 		if (get_var_type(&vars, var_name, type) < 0)
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
 		else
 			printf("printf(\"%%%s%s\", %s);\n", type, recur_count != 0 ? "\\n" : " ", var_name);
-		recur_count = 0;
-	}
-	| WriteStmt COMMA STRING {
-		printf("printf(\"%s%s\");\n", $3, recur_count != 0 ? "\\n" : " ");
-		recur_count++;
-	}
-	| WriteStmt COMMA REAL_NUM {
-		printf("printf(\"%%lf%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
-		recur_count++;
-	}
-	| WriteStmt COMMA INT_NUM {
-		printf("printf(\"%%d%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $3);
-		recur_count++;
-	}
-	| WriteStmt COMMA IDENTIFIER {
-		char type[4];
-		char var_name[128];
-
-		strcpy(var_name, $3);
-
-		if (get_var_type(&vars, var_name, type) < 0)
-			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
-		else
-			printf("printf(\"%%%s%s\", %s);\n", type, recur_count != 0 ? "\\n" : " ", var_name);
-		recur_count++;
 	}
 
 ReadStmt:
