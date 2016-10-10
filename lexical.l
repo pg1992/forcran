@@ -111,6 +111,10 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return IF_KEYWORD;
 }
 
+"else" {
+	return ELSE_KEYWORD;
+}
+
 ".true." {
 	return TRUE_KEYWORD;
 }

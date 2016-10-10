@@ -63,11 +63,22 @@ Command:
 	| Conditional
 
 Conditional:
-	IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD ConditionScope END_KEYWORD IF_KEYWORD {
+	IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD ConditionScope
+	END_KEYWORD IF_KEYWORD {
 		printf("if (%s) {\n", $3);
 		//printf("%s\n", $6);
 		printf("}\n");
 	}
+	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
+	  ConditionScope ELSE_KEYWORD ConditionScope END_KEYWORD IF_KEYWORD {
+		printf("if (%s) {\n", $3);
+		printf("else{\n", $3);
+		printf("}\n");
+		printf("}\n");
+	}
+
+ElseStmt:
+	ELSE_KEYWORD EOL ConditionStmt
 
 ConditionStmt:
 	TRUE_KEYWORD {
@@ -257,7 +268,7 @@ ReadStmt:
 	| ReadStmt COMMA IDENTIFIER {
 		char type[4];
 		char var_name[128];
-
+		
 		strcpy(var_name, $3);
 
 		if (get_var_type(&vars, var_name, type) < 0)

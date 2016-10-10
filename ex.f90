@@ -25,7 +25,7 @@ program exemplo
 	x = (3 + 5) + (8 * 2)
 
 	if (x + 2 .eq. y + 19 + 5) then 
-		x = 2
+	else
 	end if
 
 end program exemplo

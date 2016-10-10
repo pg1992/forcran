@@ -1,4 +1,6 @@
-DBG=
+TSTFLD = test/
+
+DBG= -d
 all: run
 
 run: forcran
@@ -7,6 +9,10 @@ run: forcran
 	@echo -e "\nArquivo .c gerado:\n"
 	./forcran ${DBG} < ex.f90 > out.c
 	@cat out.c
+
+tests:
+	gcc $(TSTFLD)test.c -o $(TSTFLD)run
+	./$(TSTFLD)run
 
 forcran: lex.yy.c syntactic.tab.c
 	gcc -o forcran syntactic.tab.c lex.yy.c -lm -lfl
