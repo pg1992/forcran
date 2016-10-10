@@ -1,6 +1,6 @@
 TSTFLD = test/
 
-DBG= -d
+DBG=
 all: run
 
 run: forcran

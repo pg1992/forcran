@@ -31,6 +31,8 @@ int recur_count = 0;
 %token EQUAL_KEYWORD
 %token END_IF_KEYWORD
 %token THEN_KEYWORD
+%token BGE_KEYWORD BGT_KEYWORD BLE_KEYWORD BLT_KEYWORD BNE_KEYWORD BEQ_KEYWORD
+%token AND_KEYWORD OR_KEYWORD
 
 %token TRUE_KEYWORD
 %token FALSE_KEYWORD
@@ -79,7 +81,9 @@ Conditional:
 	}
 
 ElseStmt:
-	ELSE_KEYWORD EOL ConditionStmt
+	ELSE_KEYWORD EOL ConditionScope
+	| ELSE_KEYWORD ConditionScope
+
 
 ConditionStmt:
 	TRUE_KEYWORD {
@@ -88,7 +92,7 @@ ConditionStmt:
 	| FALSE_KEYWORD {
 		$$ = strdup("0");
 	}
-	| Expression EQUAL_KEYWORD Expression {
+	| Expression Possible_Conditions Expression {
 		char tmp[512];
 		char aux[100];
 		strtok($1, ".eq.");
@@ -98,6 +102,17 @@ ConditionStmt:
 		//$$ = strdup(tmp);
 		strcpy($$, tmp);
 	}
+	| Expression Possible_Conditions Expression AND_KEYWORD ConditionStmt
+	| Expression Possible_Conditions Expression OR_KEYWORD ConditionStmt
+
+Possible_Conditions:
+	EQUAL_KEYWORD
+	| BNE_KEYWORD
+	| BGT_KEYWORD
+	| BEQ_KEYWORD
+	| BLT_KEYWORD
+	| BGE_KEYWORD
+	| BLE_KEYWORD
 
 ConditionScope:
 	/* Empty */
@@ -105,6 +120,7 @@ ConditionScope:
 		
 	}
 	| Assignment ConditionScope
+	| Conditional ConditionScope
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {

@@ -37,59 +37,10 @@ x = 2 / 2;
 w = -(4 + 2);
 x = (2 + 2) / y;
 x = (3 + 5) + (8 * 2);
-if (x + 2  == y + 19 + 5) {
+if (x + 2 .eq. y + 19 + 5 .and. x  == 2) {
 else{
 }
 }
 
 return 0;
 }
------------------------------- Debugging ------------------------------
-
-
-Debugging: variables
-
-
-All vars:
-	Type: d
-	Name: x
-
-	Type: d
-	Name: i
-
-	Type: lf
-	Name: z
-
-	Type: lf
-	Name: y
-
-	Type: lf
-	Name: r1
-
-	Type: lf
-	Name: r2
-
-	Type: d
-	Name: w
-
-	Type: d
-	Name: w1
-
-	Type: d
-	Name: w2
-
-	Type: d
-	Name: w3
-
-	Type: d
-	Name: o
-
-	Type: d
-	Name: o1
-
-	Type: d
-	Name: o23
-
-	Type: d
-	Name: pitagoras
-

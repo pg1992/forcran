@@ -127,6 +127,34 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return EQUAL_KEYWORD;
 }
 
+".ne." {
+	return BNE_KEYWORD;
+}
+
+".lt." {
+	return BLT_KEYWORD;
+}
+
+".gt." {
+	return BGT_KEYWORD;
+}
+
+".ge." {
+	return BGE_KEYWORD;
+}
+
+".le." {
+	return BLE_KEYWORD;
+}
+
+".and." {
+	return AND_KEYWORD;
+}
+
+".or." {
+	return OR_KEYWORD;
+}
+
 "'"([^'])*"'" {
 	yytext = yytext + 1;
 	yytext[strlen(yytext)-1] = 0;
