@@ -21,8 +21,8 @@ program exemplo
 	x = (2 + 2) / y
 	x = (3 + 5) + (8 * 2)
 
-	if (x + 2 .eq. y + 19 + 5) then 
-		x = 2
+	if (x + 2 .eq. y + 19 + 5 .and. x .lt. 2) then
+	else
 	end if
 
 end program exemplo
