@@ -3,10 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "functions.c"
+#include "functions/symbol_table.c"
+#include "functions/power_elements.c"
+#define ELEMENT_SIZE 100
+#define POWERS_USED 10
 
 enum {REAL, INT} type_declaration;
 int recur_count = 0;
+power_elements power_e[POWERS_USED];
+int power_used=0;
 
 %}
 
@@ -60,7 +65,6 @@ Command:
 	| PrintStmt
 	| Declaration
 	| Assignment
-	| Expression
 	| Conditional
 
 Conditional:
@@ -181,13 +185,19 @@ Expression:
 		//sprintf(tmp, "- %s", $2);
 		//$$ = strdup(tmp);
 	}
+	| Expression POWER Expression {
+		strcpy(power_e[power_used].b, get_base($1));
+		strcpy(power_e[power_used].p, get_potency($1));
+		printf("pow(%s,%s);\n", power_e[power_used].b, power_e[power_used].p);
+		power_used++;
+	}
 
 Assignment:
-	ExpressionAssign {
-		char tmp[512];
-		strcpy(tmp, $1);
-		tmp[strlen(tmp)-1] = '\0';
-		printf("%s;\n", tmp);
+	| ExpressionAssign {
+			char tmp[512];
+			strcpy(tmp, $1);
+			tmp[strlen(tmp)-1] = '\0';
+			printf("%s;\n", tmp);
 	}
 
 ExpressionAssign:

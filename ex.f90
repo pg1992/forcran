@@ -5,16 +5,13 @@ program exemplo
 	real :: y, r1, r2 ; integer :: w, w1, w2, w3
 	integer o, o1, o23, pitagoras
 
-	!read(*,*) x, i, o
-	!write(*,*) 'Teste', x, x, x, 'Um último teste para o print'
-	!write(*,*) 'Teste 2\n'
-	print *, 'Um teste para o print', x, 'Outro teste no mesmo print'
+	read(*,*) x, i, o
+	write(*,*) 'Teste 2\n'
+	print *, 'Um teste para o print', x
+	write(*,*) x, y, 'Pedro Guilherme'
+	write(*,*) 3.2e-4
 
-	!write(*,*) x, y, 'Pedro Guilherme'
-	!read(*,*) y
-	!write(*,*) y
-	!write(*,*) 3.2e-4
-
+	x = 2 ** 2
 	y = 8.2
 	x = y + 3 + 1
 	x = y - 2

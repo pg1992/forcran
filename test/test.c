@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "../functions.c"
+#include "../functions/symbol_table.c"
 
 // tests start here
 
