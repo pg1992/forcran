@@ -22,7 +22,13 @@ program exemplo
 	x = (3 + 5) + (8 * 2)
 
 	if (x + 2 .eq. y + 19 + 5 .and. x .lt. 2) then
-		r1 = x
+		if (x .eq. 1) then
+			print *, 'oi'
+		else if (x .lt. 2) then
+			x = 3
+		else
+			x = 2
+		end if
 	else if (x .eq. 2) then
 		x = 2
 	else if (y .lt. 3) then

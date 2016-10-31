@@ -131,15 +131,17 @@ Possible_Conditions:
 	| BGE_KEYWORD
 	| BLE_KEYWORD
 
-ConditionScope:
-	/* Empty */
-	| EOL ConditionScope
-	| EOL Assignment ConditionScope
-	| EOL Conditional ConditionScope
-	| EOL PrintStmt
-	| EOL WriteStmt
-	| EOL ReadStmt
-	| EOL
+ConditionScope: 
+	ConditionScope EOL MultipleScope
+	| MultipleScope
+
+MultipleScope: EOL
+	| EOL MultipleScope
+	| EOL Assignment MultipleScope
+	| EOL Conditional MultipleScope
+	| EOL PrintStmt MultipleScope
+	| EOL WriteStmt MultipleScope
+	| EOL ReadStmt MultipleScope
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
