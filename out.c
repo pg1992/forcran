@@ -28,7 +28,7 @@ printf("%d ", x);
 printf("%d\n", x);
 printf("%lf ", y);
 printf("Pedro Guilherme\n");
-printf("%lf\n", 3.2e-4);
+//write(*,*) 3.2e-4
 pow(2 , 2);
 x = 2 ** 2;
 y = 8.2;
@@ -39,9 +39,12 @@ x = 2 / 2;
 w = -(4 + 2);
 x = (2 + 2) / y;
 x = (3 + 5) + (8 * 2);
-printf("oi ");
-x = 3;
-x =2;
+printf("oi\n");
+m = 2;
+if (x  == 1) {
+else{
+}
+}
 x = 2;
 y = 4;
 z = 5;

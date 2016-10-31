@@ -79,7 +79,7 @@ Conditional:
 	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
 	  ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
 		printf("if (%s) {\n", $3);
-		printf("else{\n", $3);
+		printf("else{\n");
 		printf("}\n");
 		printf("}\n");
 	}
