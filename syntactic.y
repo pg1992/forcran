@@ -77,16 +77,29 @@ Conditional:
 		printf("}\n");
 	}
 	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
-	  ConditionScope ELSE_KEYWORD ConditionScope END_KEYWORD IF_KEYWORD {
+	  ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
 		printf("if (%s) {\n", $3);
 		printf("else{\n", $3);
 		printf("}\n");
 		printf("}\n");
 	}
+	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
+	  ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
+	  ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
+
+ElseIfStmt:
+	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
+	ConditionScope
+	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
+	ConditionScope ElseIfStmtRecur
+
+ElseIfStmtRecur: ElseStmt
+	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
+	ConditionScope ElseIfStmtRecur
 
 ElseStmt:
-	ELSE_KEYWORD EOL ConditionScope
-	| ELSE_KEYWORD ConditionScope
+	ELSE_KEYWORD ConditionScope
 
 
 ConditionStmt:
@@ -120,11 +133,13 @@ Possible_Conditions:
 
 ConditionScope:
 	/* Empty */
-	|EOL ConditionScope{
-		
-	}
-	| Assignment ConditionScope
-	| Conditional ConditionScope
+	| EOL ConditionScope
+	| EOL Assignment ConditionScope
+	| EOL Conditional ConditionScope
+	| EOL PrintStmt
+	| EOL WriteStmt
+	| EOL ReadStmt
+	| EOL
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
@@ -231,7 +246,7 @@ ExpressionAssign:
 	IDENTIFIER EQUAL Expression
 
 PrintStmt:
-	PRINT_COMMAND FormatPrint	PrintPossibilities {
+	PRINT_COMMAND FormatPrint PrintPossibilities {
 		recur_count = 0;
 	}
 	|	PrintStmt COMMA PrintPossibilities {
