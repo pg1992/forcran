@@ -232,7 +232,7 @@ ExpressionAssign:
 
 PrintText:
 	PrintStmt {
-		
+		for (
 	}
 	| WriteStmt {
 		
@@ -248,6 +248,7 @@ WriteStmt:
 
 PrintPossibilities:
 	STRING {
+		
 		printf("printf(\"%s%s\");\n", $1, recur_count != 0 ? "\\n" : " ");
 	}
 	| REAL_NUM {
