@@ -29,25 +29,28 @@ printf("%d\n", x);
 printf("%lf ", y);
 printf("Pedro Guilherme\n");
 //write(*,*) 3.2e-4
-pow(2 , 2);
-x = 2 ** 2;
-y = 8.2;
+x =22pow(2 , 2);
+;
+y =8.2;
 x = y + 3 + 1;
 x = y - 2;
 x = y * 2;
-x = 2 / 2;
-w = -(4 + 2);
-x = (2 + 2) / y;
-x = (3 + 5) + (8 * 2);
-printf("oi\n");
-m = 2;
-if (x  == 1) {
+x =2 / 2;
+w = - (4 + 2);
+x =(2 + 2) /  y;
+x =(3 + 5) + (8 * 2);
+ x + 2 ==  y + 19 + 5 &&  x < 2 x == 1printf("oi\n");
 else{
+m =2;
+}}
+ x == 2x =2;
+else if(
+ y < 3)
+y =4;
 }
-}
-x = 2;
-y = 4;
-z = 5;
+else{
+z =5;
+}}
 
 return 0;
 }
