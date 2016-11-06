@@ -18,7 +18,7 @@ forcran: lex.yy.c syntactic.tab.c
 	gcc -o forcran syntactic.tab.c lex.yy.c -lm -lfl
 
 syntactic.tab.c: syntactic.y
-	bison -d syntactic.y
+	bison -d syntactic.y --report=state
 
 lex.yy.c: lexical.l
 	flex lexical.l

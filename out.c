@@ -19,16 +19,17 @@ int o;
 int o1;
 int o23;
 int pitagoras;
-//read(*,*) x, i, o
-//write(*,*) 'Teste', x, x, x, 'Um último teste para o print'
-//write(*,*) 'Teste 2\n'
+scanf("%d", &x);
+scanf("%d", &i);
+scanf("%d", &o);
+printf("Teste 2\n ");
 printf("Um teste para o print ");
 printf("%d ", x);
-printf("Outro teste no mesmo print\n");
-//write(*,*) x, y, 'Pedro Guilherme'
-//read(*,*) y
-//write(*,*) y
-//write(*,*) 3.2e-4
+printf("%d\n", x);
+printf("%lf ", y);
+printf("Pedro Guilherme\n");
+printf("%lf\n", 3.2e-4);
+//x = 2 ** 2
 y = 8.2;
 x = y + 3 + 1;
 x = y - 2;
@@ -37,10 +38,9 @@ x = 2 / 2;
 w = -(4 + 2);
 x = (2 + 2) / y;
 x = (3 + 5) + (8 * 2);
-if (x + 2 .eq. y + 19 + 5 .and. x  == 2) {
-else{
-}
-}
+//if (x + 2 .eq. y + 19 + 5 .and. x .lt. 2) then
+//else
+//end if
 
 return 0;
 }

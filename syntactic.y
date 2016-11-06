@@ -12,6 +12,7 @@ enum {REAL, INT} type_declaration;
 int recur_count = 0;
 power_elements power_e[POWERS_USED];
 int power_used=0;
+char format_str[128];
 
 %}
 
@@ -62,9 +63,8 @@ Command:
 	}
 	| BeginProg
 	| EndProg
-	| WriteStmt
+	| PrintText
 	| ReadStmt
-	| PrintStmt
 	| Declaration
 	| Assignment
 	| Conditional
@@ -230,33 +230,33 @@ Assignment:
 ExpressionAssign:
 	IDENTIFIER EQUAL Expression
 
-PrintStmt:
-	PRINT_COMMAND FormatPrint	PrintPossibilities {
-		recur_count = 0;
+PrintText:
+	PrintStmt {
+		
 	}
-	|	PrintStmt COMMA PrintPossibilities {
-		recur_count++;
+	| WriteStmt {
+		
 	}
 
+PrintStmt:
+	PRINT_COMMAND FormatPrint PrintPossibilities
+	| PrintStmt COMMA PrintPossibilities
+
 WriteStmt:
-	WRITE_COMMAND FormatWrite PrintPossibilities {
-		recur_count = 0;
-	}
-	| WriteStmt COMMA PrintPossibilities {
-		recur_count++;
-	}
+	WRITE_COMMAND FormatWrite PrintPossibilities
+	| WriteStmt COMMA PrintPossibilities
 
 PrintPossibilities:
 	STRING {
 		printf("printf(\"%s%s\");\n", $1, recur_count != 0 ? "\\n" : " ");
 	}
-	|	REAL_NUM {
+	| REAL_NUM {
 		printf("printf(\"%%lf%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $1);
 	}
-	|	INT_NUM {
+	| INT_NUM {
 		printf("printf(\"%%d%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $1);
 	}
-	|	IDENTIFIER {
+	| IDENTIFIER {
 		char type[4];
 		char var_name[128];
 
@@ -293,7 +293,12 @@ ReadStmt:
 	}
 
 FormatWrite:
-	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
+	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS {
+		strcpy(format_str, "");
+	}
+	| OPEN_PARENS TIMES COMMA STRING CLOSE_PARENS {
+		strcpy(format_str, $4);
+	}
 
 numbers_type:
 	INT_NUM
