@@ -92,8 +92,8 @@ ElseIfStmt:
 	ConditionScope ElseIfStmtRecur
 
 ElseIfStmtRecur: ElseStmt
-	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(\n");} ConditionStmt 
-	{printf(")\n");} CLOSE_PARENS THEN_KEYWORD 
+	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
+	{printf(" ){\n");} CLOSE_PARENS THEN_KEYWORD 
 	ConditionScope {printf("}\n");} ElseIfStmtRecur
 
 ElseStmt:

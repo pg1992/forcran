@@ -44,8 +44,7 @@ else{
 m =2;
 }}
  x == 2x =2;
-else if(
- y < 3)
+else if( y < 3){
 y =4;
 }
 else{
