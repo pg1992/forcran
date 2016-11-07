@@ -44,7 +44,7 @@ int power_used=0;
 %token FALSE_KEYWORD
 %token QUOTE
 
-%token FMT_DGT FMT_TXT FMT_PT FMT_COMMA
+%token FMT_DGT FMT_TXT FMT_PT FMT_COMMA FMT_ANY FMT_BEG FMT_END
 
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -266,12 +266,12 @@ PrintStmt:
 FormatPrint:
 	TIMES COMMA
 
-/*
+
 WriteStmt:
 	WRITE_COMMAND FormatWrite PrintPossibilities {
 	}
 	| WriteStmt COMMA PrintPossibilities
-
+/*
 FormatWrite:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS {
 		printf("\n\n\tformat: '''%s'''\n\n", $4);
@@ -282,10 +282,19 @@ FormatWrite:
 		//strcpy(format_str, $4);
 	}
 */
+FormatWrite:
+	FMT_ANY
+	| FMT_BEG Format FMT_END
+
+Format:
+	FMT_TXT
+	| INT_NUM OPEN_PARENS Format CLOSE_PARENS {
+		printf("\n\n\tINT_NUM: %s\n\n", $1);
+	}
+	| Format COMMA Format
 
 PrintPossibilities:
 	STRING {
-		
 		printf("printf(\"%s\\n\");\n", $1);
 	}
 	| REAL_NUM {
