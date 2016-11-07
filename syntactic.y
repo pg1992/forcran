@@ -5,6 +5,7 @@
 #include <math.h>
 #include "functions/symbol_table.c"
 #include "functions/power_elements.c"
+#include "print_list.h"
 #define ELEMENT_SIZE 100
 #define POWERS_USED 10
 
@@ -12,7 +13,6 @@ enum {REAL, INT} type_declaration;
 int recur_count = 0;
 power_elements power_e[POWERS_USED];
 int power_used=0;
-char format_str[128];
 
 %}
 
@@ -43,6 +43,8 @@ char format_str[128];
 %token TRUE_KEYWORD
 %token FALSE_KEYWORD
 %token QUOTE
+
+%token FMT_DGT FMT_TXT FMT_PT FMT_COMMA
 
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -77,16 +79,29 @@ Conditional:
 		printf("}\n");
 	}
 	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
-	  ConditionScope ELSE_KEYWORD ConditionScope END_KEYWORD IF_KEYWORD {
+	  ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
 		printf("if (%s) {\n", $3);
-		printf("else{\n", $3);
+		printf("else{\n");
 		printf("}\n");
 		printf("}\n");
 	}
+	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
+	  ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
+	  ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
+
+ElseIfStmt:
+	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
+	ConditionScope
+	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
+	ConditionScope ElseIfStmtRecur
+
+ElseIfStmtRecur: ElseStmt
+	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
+	ConditionScope ElseIfStmtRecur
 
 ElseStmt:
-	ELSE_KEYWORD EOL ConditionScope
-	| ELSE_KEYWORD ConditionScope
+	ELSE_KEYWORD ConditionScope
 
 
 ConditionStmt:
@@ -118,13 +133,17 @@ Possible_Conditions:
 	| BGE_KEYWORD
 	| BLE_KEYWORD
 
-ConditionScope:
-	/* Empty */
-	|EOL ConditionScope{
-		
-	}
-	| Assignment ConditionScope
-	| Conditional ConditionScope
+ConditionScope: 
+	ConditionScope EOL MultipleScope
+	| MultipleScope
+
+MultipleScope: EOL
+	| EOL MultipleScope
+	| EOL Assignment MultipleScope
+	| EOL Conditional MultipleScope
+	| EOL PrintStmt MultipleScope
+	| EOL WriteStmt MultipleScope
+	| EOL ReadStmt MultipleScope
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
@@ -232,30 +251,48 @@ ExpressionAssign:
 
 PrintText:
 	PrintStmt {
-		for (
+		
 	}
 	| WriteStmt {
 		
 	}
 
 PrintStmt:
-	PRINT_COMMAND FormatPrint PrintPossibilities
+	PRINT_COMMAND FormatPrint PrintPossibilities {
+		//printf("\n\n\tformat: %s\n\n", $2);
+	}
 	| PrintStmt COMMA PrintPossibilities
 
+FormatPrint:
+	TIMES COMMA
+
+/*
 WriteStmt:
-	WRITE_COMMAND FormatWrite PrintPossibilities
+	WRITE_COMMAND FormatWrite PrintPossibilities {
+	}
 	| WriteStmt COMMA PrintPossibilities
+
+FormatWrite:
+	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS {
+		printf("\n\n\tformat: '''%s'''\n\n", $4);
+		//strcpy(format_str, "");
+	}
+	| OPEN_PARENS TIMES COMMA STRING CLOSE_PARENS {
+		printf("\n\n\tformat: '''%s'''\n\n", $4);
+		//strcpy(format_str, $4);
+	}
+*/
 
 PrintPossibilities:
 	STRING {
 		
-		printf("printf(\"%s%s\");\n", $1, recur_count != 0 ? "\\n" : " ");
+		printf("printf(\"%s\\n\");\n", $1);
 	}
 	| REAL_NUM {
-		printf("printf(\"%%lf%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $1);
+		printf("printf(\"%%lf\\n\", %s);\n", $1);
 	}
 	| INT_NUM {
-		printf("printf(\"%%d%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $1);
+		printf("printf(\"%%d\\n\", %s);\n", $1);
 	}
 	| IDENTIFIER {
 		char type[4];
@@ -266,7 +303,7 @@ PrintPossibilities:
 		if (get_var_type(&vars, var_name, type) < 0)
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
 		else
-			printf("printf(\"%%%s%s\", %s);\n", type, recur_count != 0 ? "\\n" : " ", var_name);
+			printf("printf(\"%%%s\\n\", %s);\n", type, var_name);
 	}
 
 ReadStmt:
@@ -293,14 +330,6 @@ ReadStmt:
 			printf("scanf(\"%%%s\", &%s);\n", type, var_name);
 	}
 
-FormatWrite:
-	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS {
-		strcpy(format_str, "");
-	}
-	| OPEN_PARENS TIMES COMMA STRING CLOSE_PARENS {
-		strcpy(format_str, $4);
-	}
-
 numbers_type:
 	INT_NUM
 	| REAL_NUM
@@ -313,9 +342,6 @@ ReadStmt:
 
 FormatRead:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
-
-FormatPrint:
-	TIMES COMMA
 
 VarList:
 	IDENTIFIER {}

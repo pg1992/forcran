@@ -13,7 +13,9 @@ DIGIT [0-9]
 NUMBER [0-9]+
 SIGN ("+"|"-")?
 INTEGER {SIGN}{NUMBER}
-REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
+REAL {SIGN}{NUMBER}+"."{NUMBER}?
+
+%x WRITE_STATE FMT_STR
 
 %%
 
@@ -163,76 +165,74 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return STRING;
 }
 
-"implicit" {
-	//printf("'%s' : IMPLICIT\n", yytext);
-	return IMPLICIT;
-}
+"implicit" return IMPLICIT;
 
-"none" {
-	//printf("'%s' : NONE\n", yytext);
-	return NONE;
-}
+"none" return NONE;
 
-"parameter" {
-	//printf("'%s' : PARAMETER\n", yytext);
-	return PARAMETER;
-}
+"parameter" return PARAMETER;
 
 "print" {
 	return PRINT_COMMAND;
 }
 
+	/********************************************************************************/
+	/******** Write section ********/
 "write" {
-	//printf("'%s' : WRITE_COMMAND\n", yytext);
+	BEGIN(WRITE_STATE);
 	return WRITE_COMMAND;
 }
 
+<WRITE_STATE>{
+"(*,*)" BEGIN(INITIAL);
+"(*,'" BEGIN(FMT_STR);
+<FMT_STR>{
+"')" BEGIN(INITIAL);
+[0-9]+ printf("\n\n\tDigit found: %s\n\n", yytext); return(FMT_DGT);
+[a-z]+ printf("\n\n\tText found: %s\n\n", yytext); return(FMT_TXT);
+"." printf("\n\n\tPoint found: %s\n\n", yytext); return(FMT_PT);
+"," printf("\n\n\tComma found: %s\n\n", yytext); return(FMT_COMMA);
+}
+}
+
+	/******* End of Write section *****/
+	/********************************************************************************/
+
 "read" {
-	//printf("'%s' : READ_COMMAND\n", yytext);
 	return READ_COMMAND;
 }
 
 "real" {
-	//printf("'%s' : REAL_KEYWORD\n", yytext);
 	return REAL_KEYWORD;
 }
 
 "program" {
-	//printf("'%s' : PROGRAM_KEYWORD\n", yytext);
 	return PROGRAM_KEYWORD;
 }
 
 "end" {
-	//printf("%s : END_KEYWORD\n", yytext);
 	return END_KEYWORD;
 }
 
 "integer" {
-	//printf("'%s' : INTEGER_KEYWORD\n", yytext);
 	return INTEGER_KEYWORD;
 }
 
 {REAL} {
-	//printf("'%.5g' : REAL_NUM\n", atof(yytext));
 	yylval = yytext;
 	return REAL_NUM;
 }
 
 {INTEGER} {
-	//printf("'%i' : INT_NUM\n", atoi(yytext));
 	yylval = yytext;
 	return INT_NUM;
 }
 
 [a-z][a-zA-Z0-9_]* {
-	//printf("'%s' : IDENTIFIER\n", yytext);
 	yylval = yytext;
 	return IDENTIFIER;
 }
 
-. {
-	//printf("%s : CARACTER BIZONHO\n", yytext);
-}
+.
 
 %%
 
