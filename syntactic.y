@@ -72,23 +72,20 @@ Command:
 	| Conditional
 
 Conditional:
-	IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD ConditionScope
+	IF_KEYWORD OPEN_PARENS {printf("if(");} ConditionStmt CLOSE_PARENS 
+	THEN_KEYWORD {printf("){\n");} ConditionScope
 	END_KEYWORD IF_KEYWORD {
-		printf("if (%s) {\n", $3);
-		//printf("%s\n", $6);
 		printf("}\n");
 	}
-	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
-	  ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
-		printf("if (%s) {\n", $3);
-		printf("else{\n");
-		printf("}\n");
+	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
 		printf("}\n");
 	}
-	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
-	  ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	| IF_KEYWORD OPEN_PARENS {printf("if(\n");} ConditionStmt CLOSE_PARENS THEN_KEYWORD
+	  {printf("){\n");} ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	  {printf("}\n");}
 	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
 	  ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
+	  {printf("}\n");}
 
 ElseIfStmt:
 	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
@@ -97,19 +94,22 @@ ElseIfStmt:
 	ConditionScope ElseIfStmtRecur
 
 ElseIfStmtRecur: ElseStmt
-	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
-	ConditionScope ElseIfStmtRecur
+	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
+	{printf(" ){\n");} CLOSE_PARENS THEN_KEYWORD 
+	ConditionScope {printf("}\n");} ElseIfStmtRecur
 
 ElseStmt:
-	ELSE_KEYWORD ConditionScope
+	ELSE_KEYWORD {printf("else{\n");} ConditionScope {printf("}");}
 
 
 ConditionStmt:
 	TRUE_KEYWORD {
 		$$ = strdup("1");
+		printf("1");
 	}
 	| FALSE_KEYWORD {
 		$$ = strdup("0");
+		printf("0\n");
 	}
 	| Expression Possible_Conditions Expression {
 		char tmp[512];
@@ -121,17 +121,17 @@ ConditionStmt:
 		//$$ = strdup(tmp);
 		strcpy($$, tmp);
 	}
-	| Expression Possible_Conditions Expression AND_KEYWORD ConditionStmt
-	| Expression Possible_Conditions Expression OR_KEYWORD ConditionStmt
+	| Expression Possible_Conditions Expression AND_KEYWORD {printf(" && ");} ConditionStmt
+	| Expression Possible_Conditions Expression OR_KEYWORD {printf(" || ");} ConditionStmt
 
 Possible_Conditions:
-	EQUAL_KEYWORD
-	| BNE_KEYWORD
-	| BGT_KEYWORD
+	EQUAL_KEYWORD {printf(" == ");}
+	| BNE_KEYWORD	{printf(" != ");}
+	| BGT_KEYWORD	{printf(" > ");}
 	| BEQ_KEYWORD
-	| BLT_KEYWORD
-	| BGE_KEYWORD
-	| BLE_KEYWORD
+	| BLT_KEYWORD	{printf(" < ");}
+	| BGE_KEYWORD	{printf(" >= ");}
+	| BLE_KEYWORD	{printf(" <= ");}
 
 ConditionScope: 
 	ConditionScope EOL MultipleScope
@@ -200,33 +200,35 @@ Expression:
 	}
 	| IDENTIFIER {
 		$$=$1;
+		printf(" %s", $1);
 	}
-	| OPEN_PARENS Expression CLOSE_PARENS{
+	| OPEN_PARENS {printf("(");} Expression CLOSE_PARENS{
 		char tmp[512];
+		{printf(")");}
 		//sprintf(tmp, "(%s)", $2);
 		//$$ = strdup(tmp);
 	}
-	| Expression PLUS Expression {
+	| Expression PLUS {printf(" + ");} Expression {
 		char tmp[512];
 		//sprintf(tmp, "%s %s", $1, $3);
 		//$$ = strdup(tmp);
 	}
-	| Expression MINUS Expression {
+	| Expression MINUS {printf(" - ");} Expression {
 		char tmp[512];
 		//sprintf(tmp, "%s - %s", $1, $3);
 		//$$ = strdup(tmp);
 	}
-	| Expression TIMES Expression {
+	| Expression TIMES {printf(" * ");} Expression {
 		char tmp[512];
 		//sprintf(tmp, "%s * %s", $1, $3);
 		//$$ = strdup(tmp);
 	}
-	| Expression DIVIDE Expression {
+	| Expression DIVIDE {printf(" / ");} Expression {
 		char tmp[512];
 		//sprintf(tmp, "%s / %s", $1, $3);
 		//$$ = strdup(tmp);
 	}
-	| MINUS Expression %prec NEG {
+	| MINUS {printf(" - ");} Expression %prec NEG {
 		char tmp[512];
 		//sprintf(tmp, "- %s", $2);
 		//$$ = strdup(tmp);
@@ -243,11 +245,11 @@ Assignment:
 			char tmp[512];
 			strcpy(tmp, $1);
 			tmp[strlen(tmp)-1] = '\0';
-			printf("%s;\n", tmp);
+			//printf("%s;\n", tmp);
 	}
 
 ExpressionAssign:
-	IDENTIFIER EQUAL Expression
+	IDENTIFIER EQUAL {printf("%s", $1);} Expression {printf(";\n");}
 
 PrintText:
 	PrintStmt {
@@ -340,8 +342,8 @@ ReadStmt:
 	}
 
 numbers_type:
-	INT_NUM
-	| REAL_NUM
+	INT_NUM {printf("%s", $1);}
+	| REAL_NUM {printf("%s", $1);}
 
 NumbersAssign:
 	IDENTIFIER EQUAL numbers_type
