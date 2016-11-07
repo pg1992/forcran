@@ -3,3 +3,6 @@
 !Makefile
 !*.l
 !*.y
+!*.f90
+!*.c
+/out.c

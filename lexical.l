@@ -13,7 +13,7 @@ DIGIT [0-9]
 NUMBER [0-9]+
 SIGN ("+"|"-")?
 INTEGER {SIGN}{NUMBER}
-REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
+REAL {SIGN}{NUMBER}+"."{NUMBER}?
 
 %%
 
@@ -23,11 +23,15 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return EOL;
 }
 
-"!".*\n {
-	yytext[strlen(yytext)-1] = 0;
+"!"([^\n])* {
 	yytext++;
+	yylval = yytext;
 	//printf("'%s' : COMMENT\n", yytext);
 	return COMMENT;
+}
+
+"'" {
+	return QUOTE;
 }
 
 "(" {
@@ -53,7 +57,6 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 "::" {
 	//printf("'%s' : VAR_DEF_SEPARATOR\n", yytext);
 	return VAR_DEF_SEPARATOR;
-
 }
 
 "," {
@@ -63,6 +66,11 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 
 ";" {
 	return SEMICOLON;
+}
+
+"^" {
+	//printf("'%s' : POWER\n", yytext);
+	return POWER;
 }
 
 "**" {
@@ -90,14 +98,61 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	return DIVIDE;
 }
 
-"^" {
-	//printf("'%s' : POWER\n", yytext);
-	return POWER;
-}
-
 "=" {
 	//printf("'%s' : EQUAL\n", yytext);
 	return EQUAL;
+}
+
+"then" {
+	return THEN_KEYWORD;
+}
+
+"if" {
+	return IF_KEYWORD;
+}
+
+"else" {
+	return ELSE_KEYWORD;
+}
+
+".true." {
+	return TRUE_KEYWORD;
+}
+
+".false." {
+	return FALSE_KEYWORD;
+}
+
+".eq." {
+	return EQUAL_KEYWORD;
+}
+
+".ne." {
+	return BNE_KEYWORD;
+}
+
+".lt." {
+	return BLT_KEYWORD;
+}
+
+".gt." {
+	return BGT_KEYWORD;
+}
+
+".ge." {
+	return BGE_KEYWORD;
+}
+
+".le." {
+	return BLE_KEYWORD;
+}
+
+".and." {
+	return AND_KEYWORD;
+}
+
+".or." {
+	return OR_KEYWORD;
 }
 
 "'"([^'])*"'" {
@@ -151,6 +206,7 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 	//printf("%s : END_KEYWORD\n", yytext);
 	return END_KEYWORD;
 }
+
 "integer" {
 	//printf("'%s' : INTEGER_KEYWORD\n", yytext);
 	return INTEGER_KEYWORD;
@@ -158,15 +214,17 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}(e{SIGN}?{NUMBER})?
 
 {REAL} {
 	//printf("'%.5g' : REAL_NUM\n", atof(yytext));
+	yylval = yytext;
 	return REAL_NUM;
 }
 
 {INTEGER} {
 	//printf("'%i' : INT_NUM\n", atoi(yytext));
+	yylval = yytext;
 	return INT_NUM;
 }
 
-[a-zA-Z][a-zA-Z0-9_]* {
+[a-z][a-zA-Z0-9_]* {
 	//printf("'%s' : IDENTIFIER\n", yytext);
 	yylval = yytext;
 	return IDENTIFIER;
