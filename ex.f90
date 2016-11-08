@@ -1,17 +1,17 @@
 ! teste
 program exemplo
 	implicit none
-	integer :: x, i ; real :: z
+	integer :: x, i, m ; real :: z
 	real :: y, r1, r2 ; integer :: w, w1, w2, w3
 	integer o, o1, o23, pitagoras
 
 	read(*,*) x, i, o
 	write(*,*) 'Teste 2\n'
 	print *, 'Um teste para o print', x
-	write(*,*) x, y, 'Pedro Guilherme'
+	write(*,'(A,2(F2.5,10I5))') x, y, 'Pedro Guilherme'
 	!write(*,*) 3.2e-4
 
-	x = 2 ** 2
+	!x = 2 ** 2
 	y = 8.2
 	x = y + 3 + 1
 	x = y - 2

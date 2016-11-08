@@ -5,6 +5,7 @@
 #include <math.h>
 #include "functions/symbol_table.c"
 #include "functions/power_elements.c"
+#include "print_list.h"
 #define ELEMENT_SIZE 100
 #define POWERS_USED 10
 
@@ -43,6 +44,8 @@ int power_used=0;
 %token FALSE_KEYWORD
 %token QUOTE
 
+%token FMT_DGT FMT_TXT FMT_PT FMT_COMMA FMT_ANY FMT_BEG FMT_END
+
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left NEG
@@ -62,9 +65,8 @@ Command:
 	}
 	| BeginProg
 	| EndProg
-	| WriteStmt
+	| PrintText
 	| ReadStmt
-	| PrintStmt
 	| Declaration
 	| Assignment
 	| Conditional
@@ -249,33 +251,61 @@ Assignment:
 ExpressionAssign:
 	IDENTIFIER EQUAL {printf("%s", $1);} Expression {printf(";\n");}
 
+PrintText:
+	PrintStmt {
+		
+	}
+	| WriteStmt {
+		
+	}
+
 PrintStmt:
 	PRINT_COMMAND FormatPrint PrintPossibilities {
-		recur_count = 0;
+		//printf("\n\n\tformat: %s\n\n", $2);
 	}
-	|	PrintStmt COMMA PrintPossibilities {
-		recur_count++;
-	}
+	| PrintStmt COMMA PrintPossibilities
+
+FormatPrint:
+	TIMES COMMA
+
 
 WriteStmt:
 	WRITE_COMMAND FormatWrite PrintPossibilities {
-		recur_count = 0;
 	}
-	| WriteStmt COMMA PrintPossibilities {
-		recur_count++;
+	| WriteStmt COMMA PrintPossibilities
+/*
+FormatWrite:
+	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS {
+		printf("\n\n\tformat: '''%s'''\n\n", $4);
+		//strcpy(format_str, "");
 	}
+	| OPEN_PARENS TIMES COMMA STRING CLOSE_PARENS {
+		printf("\n\n\tformat: '''%s'''\n\n", $4);
+		//strcpy(format_str, $4);
+	}
+*/
+FormatWrite:
+	FMT_ANY
+	| FMT_BEG Format FMT_END
+
+Format:
+	FMT_TXT
+	| INT_NUM OPEN_PARENS Format CLOSE_PARENS {
+		printf("\n\n\tINT_NUM: %s\n\n", $1);
+	}
+	| Format COMMA Format
 
 PrintPossibilities:
 	STRING {
-		printf("printf(\"%s%s\");\n", $1, recur_count != 0 ? "\\n" : " ");
+		printf("printf(\"%s\\n\");\n", $1);
 	}
-	|	REAL_NUM {
-		printf("printf(\"%%lf%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $1);
+	| REAL_NUM {
+		printf("printf(\"%%lf\\n\", %s);\n", $1);
 	}
-	|	INT_NUM {
-		printf("printf(\"%%d%s\", %s);\n", recur_count != 0 ? "\\n" : " ", $1);
+	| INT_NUM {
+		printf("printf(\"%%d\\n\", %s);\n", $1);
 	}
-	|	IDENTIFIER {
+	| IDENTIFIER {
 		char type[4];
 		char var_name[128];
 
@@ -284,7 +314,7 @@ PrintPossibilities:
 		if (get_var_type(&vars, var_name, type) < 0)
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
 		else
-			printf("printf(\"%%%s%s\", %s);\n", type, recur_count != 0 ? "\\n" : " ", var_name);
+			printf("printf(\"%%%s\\n\", %s);\n", type, var_name);
 	}
 
 ReadStmt:
@@ -311,9 +341,6 @@ ReadStmt:
 			printf("scanf(\"%%%s\", &%s);\n", type, var_name);
 	}
 
-FormatWrite:
-	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
-
 numbers_type:
 	INT_NUM {printf("%s", $1);}
 	| REAL_NUM {printf("%s", $1);}
@@ -326,9 +353,6 @@ ReadStmt:
 
 FormatRead:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
-
-FormatPrint:
-	TIMES COMMA
 
 VarList:
 	IDENTIFIER {}

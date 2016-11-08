@@ -15,146 +15,45 @@ SIGN ("+"|"-")?
 INTEGER {SIGN}{NUMBER}
 REAL {SIGN}{NUMBER}+"."{NUMBER}?
 
+%s WRITE_STATE FMT_STR
+
 %%
 
 {WHITE} {}
-
-\n {
-	return EOL;
-}
-
+\n return EOL;
 "!"([^\n])* {
 	yytext++;
 	yylval = yytext;
-	//printf("'%s' : COMMENT\n", yytext);
 	return COMMENT;
 }
-
-"'" {
-	return QUOTE;
-}
-
-"(" {
-	//printf("'%s' : OPEN_PARENS\n", yytext);
-	return OPEN_PARENS;
-}
-
-")" {
-	//printf("'%s' : CLOSE_PARENS\n", yytext);
-	return CLOSE_PARENS;
-}
-
-"{" {
-	//printf("'%s' : OPEN_BRACKET\n", yytext);
-	return OPEN_BRACKET;
-}
-
-"}" {
-	//printf("'%s' : CLOSE_BRACKET\n", yytext);
-	return CLOSE_BRACKET;
-}
-
-"::" {
-	//printf("'%s' : VAR_DEF_SEPARATOR\n", yytext);
-	return VAR_DEF_SEPARATOR;
-}
-
-"," {
-	//printf("'%s' : COMMA\n", yytext);
-	return COMMA;
-}
-
-";" {
-	return SEMICOLON;
-}
-
-"^" {
-	//printf("'%s' : POWER\n", yytext);
-	return POWER;
-}
-
-"**" {
-	//printf("'%s' : POWER\n", yytext);
-	return POWER;
-}
-
-"*" {
-	//printf("'%s' : TIMES\n", yytext);
-	return TIMES;
-}
-
-"+" {
-	//printf("'%s' : PLUS\n", yytext);
-	return PLUS;
-}
-
-"-" {
-	//printf("'%s' : MINUS\n", yytext);
-	return MINUS;
-}
-
-"/" {
-	//printf("'%s' : DIVIDE\n", yytext);
-	return DIVIDE;
-}
-
-"=" {
-	//printf("'%s' : EQUAL\n", yytext);
-	return EQUAL;
-}
-
-"then" {
-	return THEN_KEYWORD;
-}
-
-"if" {
-	return IF_KEYWORD;
-}
-
-"else" {
-	return ELSE_KEYWORD;
-}
-
-".true." {
-	return TRUE_KEYWORD;
-}
-
-".false." {
-	return FALSE_KEYWORD;
-}
-
-".eq." {
-	return EQUAL_KEYWORD;
-}
-
-".ne." {
-	return BNE_KEYWORD;
-}
-
-".lt." {
-	return BLT_KEYWORD;
-}
-
-".gt." {
-	return BGT_KEYWORD;
-}
-
-".ge." {
-	return BGE_KEYWORD;
-}
-
-".le." {
-	return BLE_KEYWORD;
-}
-
-".and." {
-	return AND_KEYWORD;
-}
-
-".or." {
-	return OR_KEYWORD;
-}
-
+"'" return QUOTE;
+"(" return OPEN_PARENS;
+")" return CLOSE_PARENS;
+"{" return OPEN_BRACKET;
+"}" return CLOSE_BRACKET;
+"::" return VAR_DEF_SEPARATOR;
+"," return COMMA;
+";" return SEMICOLON;
+"^" return POWER;
+"**" return POWER;
+"*" return TIMES;
+"+" return PLUS;
+"-" return MINUS;
+"/" return DIVIDE;
+"=" return EQUAL;
+"then" return THEN_KEYWORD;
+"if" return IF_KEYWORD;
+"else" return ELSE_KEYWORD;
+".true." return TRUE_KEYWORD;
+".false." return FALSE_KEYWORD;
+".eq." return EQUAL_KEYWORD;
+".ne." return BNE_KEYWORD;
+".lt." return BLT_KEYWORD;
+".gt." return BGT_KEYWORD;
+".ge." return BGE_KEYWORD;
+".le." return BLE_KEYWORD;
+".and." return AND_KEYWORD;
+".or." return OR_KEYWORD;
 "'"([^'])*"'" {
 	yytext = yytext + 1;
 	yytext[strlen(yytext)-1] = 0;
@@ -162,77 +61,45 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 	yylval = yytext;
 	return STRING;
 }
-
-"implicit" {
-	//printf("'%s' : IMPLICIT\n", yytext);
-	return IMPLICIT;
-}
-
-"none" {
-	//printf("'%s' : NONE\n", yytext);
-	return NONE;
-}
-
-"parameter" {
-	//printf("'%s' : PARAMETER\n", yytext);
-	return PARAMETER;
-}
-
-"print" {
-	return PRINT_COMMAND;
-}
-
+"implicit" return IMPLICIT;
+"none" return NONE;
+"parameter" return PARAMETER;
+"print" return PRINT_COMMAND;
+	/********************************************************************************/
+	/******** Write section ********/
 "write" {
-	//printf("'%s' : WRITE_COMMAND\n", yytext);
+	BEGIN(WRITE_STATE);
+	printf("\n\n\tWRITE_COMMAND\n\n");
 	return WRITE_COMMAND;
 }
-
-"read" {
-	//printf("'%s' : READ_COMMAND\n", yytext);
-	return READ_COMMAND;
+<WRITE_STATE>{
+"(*,*)" BEGIN(INITIAL); return(FMT_ANY);
+"(*,'(" BEGIN(FMT_STR); return(FMT_BEG);
+<FMT_STR>{
+")')" BEGIN(INITIAL); return(FMT_END);
+({NUMBER})?(e|es|l|a|x|t|i|f)({NUMBER}("."{NUMBER})?)? printf("\n\n\tText found: %s\n\n", yytext); return(FMT_TXT);
 }
-
-"real" {
-	//printf("'%s' : REAL_KEYWORD\n", yytext);
-	return REAL_KEYWORD;
 }
-
-"program" {
-	//printf("'%s' : PROGRAM_KEYWORD\n", yytext);
-	return PROGRAM_KEYWORD;
-}
-
-"end" {
-	//printf("%s : END_KEYWORD\n", yytext);
-	return END_KEYWORD;
-}
-
-"integer" {
-	//printf("'%s' : INTEGER_KEYWORD\n", yytext);
-	return INTEGER_KEYWORD;
-}
-
+	/******* End of Write section *****/
+	/********************************************************************************/
+"read" return READ_COMMAND;
+"real" return REAL_KEYWORD;
+"program" return PROGRAM_KEYWORD;
+"end" return END_KEYWORD;
+"integer" return INTEGER_KEYWORD;
 {REAL} {
-	//printf("'%.5g' : REAL_NUM\n", atof(yytext));
 	yylval = yytext;
 	return REAL_NUM;
 }
-
 {INTEGER} {
-	//printf("'%i' : INT_NUM\n", atoi(yytext));
 	yylval = yytext;
 	return INT_NUM;
 }
-
 [a-z][a-zA-Z0-9_]* {
-	//printf("'%s' : IDENTIFIER\n", yytext);
 	yylval = yytext;
 	return IDENTIFIER;
 }
-
-. {
-	//printf("%s : CARACTER BIZONHO\n", yytext);
-}
+.
 
 %%
 
