@@ -39,6 +39,7 @@ int power_used=0;
 %token THEN_KEYWORD
 %token BGE_KEYWORD BGT_KEYWORD BLE_KEYWORD BLT_KEYWORD BNE_KEYWORD BEQ_KEYWORD
 %token AND_KEYWORD OR_KEYWORD
+%token DO_KEYWORD
 
 %token TRUE_KEYWORD
 %token FALSE_KEYWORD
@@ -70,6 +71,7 @@ Command:
 	| Declaration
 	| Assignment
 	| Conditional
+	| Repetition
 
 Conditional:
 	IfStmt ConditionScope END_KEYWORD IF_KEYWORD {
@@ -114,14 +116,6 @@ ConditionStmt:
 		printf("0\n");
 	}
 	| Expression Possible_Conditions Expression {
-		char tmp[512];
-		char aux[100];
-		strtok($1, ".eq.");
-		strcpy(aux, $3);
-		strtok(aux, ")");
-		sprintf(tmp, "%s == %s", $1, aux);
-		//$$ = strdup(tmp);
-		strcpy($$, tmp);
 	}
 	| Expression Possible_Conditions Expression AND_KEYWORD {printf(" && ");} ConditionStmt
 	| Expression Possible_Conditions Expression OR_KEYWORD {printf(" || ");} ConditionStmt
@@ -130,7 +124,6 @@ Possible_Conditions:
 	EQUAL_KEYWORD {printf(" == ");}
 	| BNE_KEYWORD	{printf(" != ");}
 	| BGT_KEYWORD	{printf(" > ");}
-	| BEQ_KEYWORD
 	| BLT_KEYWORD	{printf(" < ");}
 	| BGE_KEYWORD	{printf(" >= ");}
 	| BLE_KEYWORD	{printf(" <= ");}
@@ -147,6 +140,13 @@ MultipleScope: EOL
 	| EOL PrintStmt MultipleScope
 	| EOL WriteStmt MultipleScope
 	| EOL ReadStmt MultipleScope
+
+Repetition:
+	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD
+
+RepetitionFormat:
+	DO_KEYWORD IDENTIFIER EQUAL Expression COMMA Expression
+	| DO_KEYWORD IDENTIFIER EQUAL Expression COMMA Expression COMMA Expression
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {

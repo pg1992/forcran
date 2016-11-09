@@ -21,6 +21,12 @@ program exemplo
 	x = (2 + 2) / y
 	x = (3 + 5) + (8 * 2)
 
+	do i = 1, N
+ 		x = x0 + v*t + 0.5*a*t*t
+   		print*, t, x
+   		t = t + dt
+	end do
+
 	if (x + 2 .eq. y + 19 + 5 .and. x .lt. 2) then
 		if (x .eq. 1) then
 			! oi
