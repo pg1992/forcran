@@ -5,7 +5,7 @@
 #include <math.h>
 #include "functions/symbol_table.c"
 #include "functions/power_elements.c"
-#include "print_list.h"
+//#include "print_list.h"
 #define ELEMENT_SIZE 100
 #define POWERS_USED 10
 
@@ -72,31 +72,33 @@ Command:
 	| Conditional
 
 Conditional:
-	IF_KEYWORD OPEN_PARENS {printf("if(");} ConditionStmt CLOSE_PARENS 
-	THEN_KEYWORD {printf("){\n");} ConditionScope
-	END_KEYWORD IF_KEYWORD {
+	IfStmt ConditionScope END_KEYWORD IF_KEYWORD {
 		printf("}\n");
 	}
-	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
-		printf("}\n");
+	| IfStmt ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
+		//	printf("}\n");
 	}
-	| IF_KEYWORD OPEN_PARENS {printf("if(\n");} ConditionStmt CLOSE_PARENS THEN_KEYWORD
-	  {printf("){\n");} ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	| IfStmt ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
 	  {printf("}\n");}
-	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
-	  ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
+	| IfStmt ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
 	  {printf("}\n");}
+
+IfStmt:
+	IF_KEYWORD OPEN_PARENS {printf("if(");} ConditionStmt CLOSE_PARENS THEN_KEYWORD {
+		printf("){\n");
+	}
 
 ElseIfStmt:
-	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
-	ConditionScope
-	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
-	ConditionScope ElseIfStmtRecur
+	ElseIfFormat ConditionScope
+	| ElseIfFormat ConditionScope ElseIfStmtRecur
 
-ElseIfStmtRecur: ElseStmt
-	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
-	{printf(" ){\n");} CLOSE_PARENS THEN_KEYWORD 
-	ConditionScope {printf("}\n");} ElseIfStmtRecur
+ElseIfStmtRecur:
+	ElseIfFormat ConditionScope {printf("}\n");}
+	;
+
+ElseIfFormat:
+	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
+	CLOSE_PARENS THEN_KEYWORD {printf("){\n");}
 
 ElseStmt:
 	ELSE_KEYWORD {printf("else{\n");} ConditionScope {printf("}");}
@@ -138,6 +140,7 @@ ConditionScope:
 	| MultipleScope
 
 MultipleScope: EOL
+	| EOL COMMENT {printf("//%s\n", $2);} MultipleScope
 	| EOL MultipleScope
 	| EOL Assignment MultipleScope
 	| EOL Conditional MultipleScope

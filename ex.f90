@@ -23,7 +23,8 @@ program exemplo
 
 	if (x + 2 .eq. y + 19 + 5 .and. x .lt. 2) then
 		if (x .eq. 1) then
-			print *, 'oi'
+			! oi
+			print *, 'oieieee'
 		else
 			m = 2
 		end if
