@@ -132,7 +132,7 @@ ConditionScope:
 	ConditionScope EOL MultipleScope
 	| MultipleScope
 
-MultipleScope: EOL
+MultipleScope:
 	| EOL COMMENT {printf("//%s\n", $2);} MultipleScope
 	| EOL MultipleScope
 	| EOL Assignment MultipleScope
@@ -145,8 +145,8 @@ Repetition:
 	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD
 
 RepetitionFormat:
-	DO_KEYWORD IDENTIFIER EQUAL Expression COMMA Expression
-	| DO_KEYWORD IDENTIFIER EQUAL Expression COMMA Expression COMMA Expression
+	DO_KEYWORD ExpressionAssign COMMA Expression
+	| DO_KEYWORD ExpressionAssign COMMA Expression COMMA Expression
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
@@ -356,6 +356,7 @@ ReadStmt:
 
 FormatRead:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
+	| TIMES COMMA
 
 VarList:
 	IDENTIFIER {}
