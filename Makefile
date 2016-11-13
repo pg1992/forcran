@@ -7,8 +7,7 @@ run: forcran
 	@echo -e "Arquivo .f90:\n"
 	@cat ex.f90
 	@echo -e "\nArquivo .c gerado:\n"
-	./forcran ${DBG} < ex.f90 > out.c
-	@cat out.c
+	./forcran ${DBG} < ex.f90 > out.c && cat out.c
 
 tests:
 	gcc $(TSTFLD)test.c -o $(TSTFLD)run

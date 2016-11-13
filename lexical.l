@@ -67,17 +67,16 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 "print" return PRINT_COMMAND;
 	/********************************************************************************/
 	/******** Write section ********/
-"write" {
-	BEGIN(WRITE_STATE);
-	printf("\n\n\tWRITE_COMMAND\n\n");
-	return WRITE_COMMAND;
-}
+"write" BEGIN(WRITE_STATE); return WRITE_COMMAND;
 <WRITE_STATE>{
 "(*,*)" BEGIN(INITIAL); return(FMT_ANY);
 "(*,'(" BEGIN(FMT_STR); return(FMT_BEG);
 <FMT_STR>{
 ")')" BEGIN(INITIAL); return(FMT_END);
-({NUMBER})?(e|es|l|a|x|t|i|f)({NUMBER}("."{NUMBER})?)? printf("\n\n\tText found: %s\n\n", yytext); return(FMT_TXT);
+({NUMBER})?(e|es|l|a|x|t|i|f)({NUMBER}("."{NUMBER})?)? {
+	yylval = yytext;
+	return(FMT_TXT);
+}
 }
 }
 	/******* End of Write section *****/
