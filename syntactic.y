@@ -5,7 +5,7 @@
 #include <math.h>
 #include "functions/symbol_table.c"
 #include "functions/power_elements.c"
-#include "print_list.h"
+//#include "print_list.h"
 #define ELEMENT_SIZE 100
 #define POWERS_USED 10
 
@@ -39,6 +39,7 @@ int power_used=0;
 %token THEN_KEYWORD
 %token BGE_KEYWORD BGT_KEYWORD BLE_KEYWORD BLT_KEYWORD BNE_KEYWORD BEQ_KEYWORD
 %token AND_KEYWORD OR_KEYWORD
+%token DO_KEYWORD
 
 %token TRUE_KEYWORD
 %token FALSE_KEYWORD
@@ -74,21 +75,22 @@ Command:
 	;
 
 Conditional:
-	IF_KEYWORD OPEN_PARENS {printf("if(");} ConditionStmt CLOSE_PARENS 
-	THEN_KEYWORD {printf("){\n");} ConditionScope
-	END_KEYWORD IF_KEYWORD {
+	IfStmt ConditionScope END_KEYWORD IF_KEYWORD {
 		printf("}\n");
 	}
-	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
-		printf("}\n");
+	| IfStmt ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
+		//	printf("}\n");
 	}
-	| IF_KEYWORD OPEN_PARENS {printf("if(\n");} ConditionStmt CLOSE_PARENS THEN_KEYWORD
-	  {printf("){\n");} ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	| IfStmt ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
 	  {printf("}\n");}
-	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
-	  ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
+	| IfStmt ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
 	  {printf("}\n");}
 	;
+
+IfStmt:
+	IF_KEYWORD OPEN_PARENS {printf("if(");} ConditionStmt CLOSE_PARENS THEN_KEYWORD {
+		printf("){\n");
+	}
 
 ElseIfStmt:
 	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
@@ -101,6 +103,16 @@ ElseIfStmtRecur: ElseStmt
 	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
 	{printf(" ){\n");} CLOSE_PARENS THEN_KEYWORD 
 	ConditionScope {printf("}\n");} ElseIfStmtRecur
+	ElseIfFormat ConditionScope
+	| ElseIfFormat ConditionScope ElseIfStmtRecur
+
+ElseIfStmtRecur:
+	ElseIfFormat ConditionScope {printf("}\n");}
+	;
+
+ElseIfFormat:
+	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
+	CLOSE_PARENS THEN_KEYWORD {printf("){\n");}
 	;
 
 ElseStmt:
@@ -118,14 +130,6 @@ ConditionStmt:
 		printf("0\n");
 	}
 	| Expression Possible_Conditions Expression {
-		char tmp[512];
-		char aux[100];
-		strtok($1, ".eq.");
-		strcpy(aux, $3);
-		strtok(aux, ")");
-		sprintf(tmp, "%s == %s", $1, aux);
-		//$$ = strdup(tmp);
-		strcpy($$, tmp);
 	}
 	| Expression Possible_Conditions Expression AND_KEYWORD {printf(" && ");} ConditionStmt
 	| Expression Possible_Conditions Expression OR_KEYWORD {printf(" || ");} ConditionStmt
@@ -135,7 +139,6 @@ Possible_Conditions:
 	EQUAL_KEYWORD {printf(" == ");}
 	| BNE_KEYWORD	{printf(" != ");}
 	| BGT_KEYWORD	{printf(" > ");}
-	| BEQ_KEYWORD
 	| BLT_KEYWORD	{printf(" < ");}
 	| BGE_KEYWORD	{printf(" >= ");}
 	| BLE_KEYWORD	{printf(" <= ");}
@@ -146,7 +149,8 @@ ConditionScope:
 	| MultipleScope
 	;
 
-MultipleScope: EOL
+MultipleScope:
+	| EOL COMMENT {printf("//%s\n", $2);} MultipleScope
 	| EOL MultipleScope
 	| EOL Assignment MultipleScope
 	| EOL Conditional MultipleScope
@@ -154,6 +158,13 @@ MultipleScope: EOL
 	| EOL WriteStmt MultipleScope
 	| EOL ReadStmt MultipleScope
 	;
+
+Repetition:
+	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD
+
+RepetitionFormat:
+	DO_KEYWORD ExpressionAssign COMMA Expression
+	| DO_KEYWORD ExpressionAssign COMMA Expression COMMA Expression
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {

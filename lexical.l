@@ -41,6 +41,7 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 "-" return MINUS;
 "/" return DIVIDE;
 "=" return EQUAL;
+"do" return DO_KEYWORD;
 "then" return THEN_KEYWORD;
 "if" return IF_KEYWORD;
 "else" return ELSE_KEYWORD;
