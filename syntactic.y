@@ -75,48 +75,32 @@ Command:
 	;
 
 Conditional:
-	IfStmt ConditionScope END_KEYWORD IF_KEYWORD {
-		printf("}\n");
-	}
-	| IfStmt ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
-		//	printf("}\n");
-	}
-	| IfStmt ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
-	  {printf("}\n");}
-	| IfStmt ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
-	  {printf("}\n");}
-	;
+	IfStmt ConditionScope END_KEYWORD IF_KEYWORD
+	| IfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	| IfStmt ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	| IfStmt ElseIfStmt END_KEYWORD IF_KEYWORD
 
 IfStmt:
 	IF_KEYWORD OPEN_PARENS {printf("if(");} ConditionStmt CLOSE_PARENS THEN_KEYWORD {
 		printf("){\n");
-	}
+	} ConditionScope {printf("}\n");}
 
 ElseIfStmt:
-	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
-	ConditionScope
-	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
-	ConditionScope ElseIfStmtRecur
+	ElseIfFormat
+	| ElseIfFormat ElseIfStmtRecur
 	;
 
 ElseIfStmtRecur: ElseStmt
-	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
-	{printf(" ){\n");} CLOSE_PARENS THEN_KEYWORD 
-	ConditionScope {printf("}\n");} ElseIfStmtRecur
-	ElseIfFormat ConditionScope
-	| ElseIfFormat ConditionScope ElseIfStmtRecur
-
-ElseIfStmtRecur:
-	ElseIfFormat ConditionScope {printf("}\n");}
+	| ElseIfFormat ElseIfStmtRecur
 	;
 
 ElseIfFormat:
 	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
-	CLOSE_PARENS THEN_KEYWORD {printf("){\n");}
+	CLOSE_PARENS THEN_KEYWORD {printf("){\n");} ConditionScope {printf("}\n");}
 	;
 
 ElseStmt:
-	ELSE_KEYWORD {printf("else{\n");} ConditionScope {printf("}");}
+	ELSE_KEYWORD {printf("else{\n");} ConditionScope {printf("}\n");}
 	;
 
 
