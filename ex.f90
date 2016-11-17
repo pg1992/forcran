@@ -1,7 +1,7 @@
 ! teste
 program exemplo
 	implicit none
-	integer :: x, i, m ; real :: z
+	integer :: x, i, m, t ; real :: z
 	real :: y, r1, r2 ; integer :: w, w1, w2, w3
 	integer o, o1, o23, pitagoras
 
@@ -20,6 +20,12 @@ program exemplo
 	w = -(4 + 2)
 	x = (2 + 2) / y
 	x = (3 + 5) + (8 * 2)
+
+	do i = 1, N
+ 		x = x0 + v*t + 0.5*a*t*t
+   		print *, t, x
+   		t = t + dt
+	end do
 
 	if (x + 2 .eq. y + 19 + 5 .and. x .lt. 2) then
 		if (x .eq. 1) then

@@ -14,6 +14,9 @@ int recur_count = 0;
 power_elements power_e[POWERS_USED];
 int power_used=0;
 
+
+char for_counter[10];
+
 %}
 
 %token EOL
@@ -72,6 +75,7 @@ Command:
 	| Declaration
 	| Assignment
 	| Conditional
+	| Repetition
 	;
 
 Conditional:
@@ -141,14 +145,42 @@ MultipleScope:
 	| EOL PrintStmt MultipleScope
 	| EOL WriteStmt MultipleScope
 	| EOL ReadStmt MultipleScope
+	| EOL Repetition MultipleScope
 	;
 
 Repetition:
-	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD
+	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
 
 RepetitionFormat:
-	DO_KEYWORD ExpressionAssign COMMA Expression
-	| DO_KEYWORD ExpressionAssign COMMA Expression COMMA Expression
+	FirstPartRepetitionFormat RepetitionExpression {
+		printf("for(%s = %s;", for_counter, $2);
+	} COMMA RepetitionExpression{
+		printf("%s <= %s; %s++){\n", for_counter, $5, for_counter);
+	}
+
+FirstPartRepetitionFormat:
+	DO_KEYWORD IDENTIFIER  {
+		strcpy(for_counter, $2);
+	} EQUAL
+
+RepetitionExpression:
+	INT_NUM {
+		$$=$1;
+	}
+	| REAL_NUM{
+		$$=$1;
+	}
+	| IDENTIFIER{
+		$$=$1;
+	}
+	| OPEN_PARENS {printf("(");} Expression CLOSE_PARENS {printf(")");}
+	| RepetitionExpression PLUS {printf(" + ");} RepetitionExpression
+	| RepetitionExpression MINUS {printf(" - ");} RepetitionExpression
+	| RepetitionExpression TIMES {printf(" * ");} RepetitionExpression
+	| RepetitionExpression DIVIDE {printf(" / ");} RepetitionExpression
+	| MINUS {printf(" - ");} RepetitionExpression %prec NEG
+	;
+
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
@@ -316,8 +348,14 @@ ReadStmt:
 	;
 
 numbers_type:
-	INT_NUM {printf("%s", $1);}
-	| REAL_NUM {printf("%s", $1);}
+	INT_NUM {
+		$$ = $1;
+		printf("%s", $1);
+	}
+	| REAL_NUM {
+		$$ = $1;
+		printf("%s", $1);
+	}
 	;
 
 NumbersAssign:
