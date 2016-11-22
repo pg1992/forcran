@@ -16,6 +16,7 @@ int power_used=0;
 
 
 char for_counter[10];
+char for_expression[100] = "\0";
 
 %}
 
@@ -152,32 +153,40 @@ Repetition:
 	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
 
 RepetitionFormat:
-	FirstPartRepetitionFormat RepetitionExpression {
-		printf("for(%s = %s;", for_counter, $2);
-	} COMMA RepetitionExpression{
-		printf("%s <= %s; %s++){\n", for_counter, $5, for_counter);
+	FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA RepetitionExpression{
+		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
+	}
+	| FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA RepetitionExpression{
+		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
 	}
 
 FirstPartRepetitionFormat:
 	DO_KEYWORD IDENTIFIER  {
 		strcpy(for_counter, $2);
-	} EQUAL
+	} EQUAL {
+		printf("for(%s = ", for_counter);
+	}
 
 RepetitionExpression:
 	INT_NUM {
 		$$=$1;
+		strcat(for_expression, $1);
+		//printf("%s", $1);
 	}
 	| REAL_NUM{
 		$$=$1;
+		//printf("%s", $1);
 	}
 	| IDENTIFIER{
 		$$=$1;
+		strcat(for_expression, $1);
+		//printf("%s", $1);
 	}
 	| OPEN_PARENS {printf("(");} Expression CLOSE_PARENS {printf(")");}
-	| RepetitionExpression PLUS {printf(" + ");} RepetitionExpression
-	| RepetitionExpression MINUS {printf(" - ");} RepetitionExpression
-	| RepetitionExpression TIMES {printf(" * ");} RepetitionExpression
-	| RepetitionExpression DIVIDE {printf(" / ");} RepetitionExpression
+	| RepetitionExpression PLUS {strcat(for_expression, "+");} RepetitionExpression 
+	| RepetitionExpression MINUS {strcat(for_expression, "-");} RepetitionExpression
+	| RepetitionExpression TIMES {strcat(for_expression, "*");} RepetitionExpression
+	| RepetitionExpression DIVIDE {strcat(for_expression, "/");} RepetitionExpression
 	| MINUS {printf(" - ");} RepetitionExpression %prec NEG
 	;
 
