@@ -66,8 +66,7 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 "none" return NONE;
 "parameter" return PARAMETER;
 "print" return PRINT_COMMAND;
-	/********************************************************************************/
-	/******** Write section ********/
+
 "write" BEGIN(WRITE_STATE); return WRITE_COMMAND;
 <WRITE_STATE>{
 "(*,*)" BEGIN(INITIAL); return(FMT_ANY);
@@ -80,8 +79,7 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 }
 }
 }
-	/******* End of Write section *****/
-	/********************************************************************************/
+
 "read" return READ_COMMAND;
 "real" return REAL_KEYWORD;
 "program" return PROGRAM_KEYWORD;
