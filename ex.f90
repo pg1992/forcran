@@ -15,7 +15,7 @@ program exemplo
 	y = 8.2
 	x = y + 3 + 1
 	x = y - 2
-	x = y * 2
+	x = y * 2 ! oi
 	x = 2 / 2
 	w = -(4 + 2)
 	x = (2 + 2) / y
