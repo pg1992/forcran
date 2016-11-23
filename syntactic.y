@@ -39,6 +39,7 @@ int power_used=0;
 %token THEN_KEYWORD
 %token BGE_KEYWORD BGT_KEYWORD BLE_KEYWORD BLT_KEYWORD BNE_KEYWORD BEQ_KEYWORD
 %token AND_KEYWORD OR_KEYWORD
+%token DO_KEYWORD
 
 %token TRUE_KEYWORD
 %token FALSE_KEYWORD
@@ -57,6 +58,10 @@ CommandList:
 	/* Empty */
 	| CommandList Command SEMICOLON
 	| CommandList Command EOL
+	| CommandList Command COMMENT EOL {
+		printf("//%s\n", $3);
+	}
+	;
 
 Command:
 	/* Empty */
@@ -65,41 +70,57 @@ Command:
 	}
 	| BeginProg
 	| EndProg
-	| PrintText
+	| { clear_all(); } PrintText { print_all(); }
 	| ReadStmt
 	| Declaration
 	| Assignment
 	| Conditional
+	;
 
 Conditional:
-	IF_KEYWORD OPEN_PARENS {printf("if(");} ConditionStmt CLOSE_PARENS 
-	THEN_KEYWORD {printf("){\n");} ConditionScope
-	END_KEYWORD IF_KEYWORD {
+	IfStmt ConditionScope END_KEYWORD IF_KEYWORD {
 		printf("}\n");
 	}
-	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
-		printf("}\n");
+	| IfStmt ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
+		//	printf("}\n");
 	}
-	| IF_KEYWORD OPEN_PARENS {printf("if(\n");} ConditionStmt CLOSE_PARENS THEN_KEYWORD
-	  {printf("){\n");} ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	| IfStmt ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
 	  {printf("}\n");}
-	| IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD
-	  ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
+	| IfStmt ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
 	  {printf("}\n");}
+	;
+
+IfStmt:
+	IF_KEYWORD OPEN_PARENS {printf("if(");} ConditionStmt CLOSE_PARENS THEN_KEYWORD {
+		printf("){\n");
+	}
 
 ElseIfStmt:
 	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
 	ConditionScope
 	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
 	ConditionScope ElseIfStmtRecur
+	;
 
 ElseIfStmtRecur: ElseStmt
 	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
 	{printf(" ){\n");} CLOSE_PARENS THEN_KEYWORD 
 	ConditionScope {printf("}\n");} ElseIfStmtRecur
+	ElseIfFormat ConditionScope
+	| ElseIfFormat ConditionScope ElseIfStmtRecur
+
+ElseIfStmtRecur:
+	ElseIfFormat ConditionScope {printf("}\n");}
+	;
+
+ElseIfFormat:
+	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
+	CLOSE_PARENS THEN_KEYWORD {printf("){\n");}
+	;
 
 ElseStmt:
 	ELSE_KEYWORD {printf("else{\n");} ConditionScope {printf("}");}
+	;
 
 
 ConditionStmt:
@@ -112,38 +133,41 @@ ConditionStmt:
 		printf("0\n");
 	}
 	| Expression Possible_Conditions Expression {
-		char tmp[512];
-		char aux[100];
-		strtok($1, ".eq.");
-		strcpy(aux, $3);
-		strtok(aux, ")");
-		sprintf(tmp, "%s == %s", $1, aux);
-		//$$ = strdup(tmp);
-		strcpy($$, tmp);
 	}
 	| Expression Possible_Conditions Expression AND_KEYWORD {printf(" && ");} ConditionStmt
 	| Expression Possible_Conditions Expression OR_KEYWORD {printf(" || ");} ConditionStmt
+	;
 
 Possible_Conditions:
 	EQUAL_KEYWORD {printf(" == ");}
 	| BNE_KEYWORD	{printf(" != ");}
 	| BGT_KEYWORD	{printf(" > ");}
-	| BEQ_KEYWORD
 	| BLT_KEYWORD	{printf(" < ");}
 	| BGE_KEYWORD	{printf(" >= ");}
 	| BLE_KEYWORD	{printf(" <= ");}
+	;
 
 ConditionScope: 
 	ConditionScope EOL MultipleScope
 	| MultipleScope
+	;
 
-MultipleScope: EOL
+MultipleScope:
+	| EOL COMMENT {printf("//%s\n", $2);} MultipleScope
 	| EOL MultipleScope
 	| EOL Assignment MultipleScope
 	| EOL Conditional MultipleScope
 	| EOL PrintStmt MultipleScope
 	| EOL WriteStmt MultipleScope
 	| EOL ReadStmt MultipleScope
+	;
+
+Repetition:
+	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD
+
+RepetitionFormat:
+	DO_KEYWORD ExpressionAssign COMMA Expression
+	| DO_KEYWORD ExpressionAssign COMMA Expression COMMA Expression
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
@@ -189,10 +213,10 @@ Declaration:
 			type_declaration = REAL;
 			break;
 		default:
-			// TODO Escreva uma mensagem de erro decente
-			yyerror();
+			yyerror("Syntax error: erroneous variable declaration.\n");
 		}
 	}
+	;
 
 Expression:
 	numbers_type {
@@ -202,108 +226,79 @@ Expression:
 		$$=$1;
 		printf(" %s", $1);
 	}
-	| OPEN_PARENS {printf("(");} Expression CLOSE_PARENS{
-		char tmp[512];
-		{printf(")");}
-		//sprintf(tmp, "(%s)", $2);
-		//$$ = strdup(tmp);
-	}
-	| Expression PLUS {printf(" + ");} Expression {
-		char tmp[512];
-		//sprintf(tmp, "%s %s", $1, $3);
-		//$$ = strdup(tmp);
-	}
-	| Expression MINUS {printf(" - ");} Expression {
-		char tmp[512];
-		//sprintf(tmp, "%s - %s", $1, $3);
-		//$$ = strdup(tmp);
-	}
-	| Expression TIMES {printf(" * ");} Expression {
-		char tmp[512];
-		//sprintf(tmp, "%s * %s", $1, $3);
-		//$$ = strdup(tmp);
-	}
-	| Expression DIVIDE {printf(" / ");} Expression {
-		char tmp[512];
-		//sprintf(tmp, "%s / %s", $1, $3);
-		//$$ = strdup(tmp);
-	}
-	| MINUS {printf(" - ");} Expression %prec NEG {
-		char tmp[512];
-		//sprintf(tmp, "- %s", $2);
-		//$$ = strdup(tmp);
-	}
+	| OPEN_PARENS {printf("(");} Expression CLOSE_PARENS {printf(")");}
+	| Expression PLUS {printf(" + ");} Expression
+	| Expression MINUS {printf(" - ");} Expression
+	| Expression TIMES {printf(" * ");} Expression
+	| Expression DIVIDE {printf(" / ");} Expression
+	| MINUS {printf(" - ");} Expression %prec NEG
 	| Expression POWER Expression {
 		strcpy(power_e[power_used].b, get_base($1));
 		strcpy(power_e[power_used].p, get_potency($1));
 		printf("pow(%s,%s);\n", power_e[power_used].b, power_e[power_used].p);
 		power_used++;
 	}
+	;
 
 Assignment:
 	| ExpressionAssign {
 			char tmp[512];
 			strcpy(tmp, $1);
 			tmp[strlen(tmp)-1] = '\0';
-			//printf("%s;\n", tmp);
 	}
+	;
 
 ExpressionAssign:
 	IDENTIFIER EQUAL {printf("%s", $1);} Expression {printf(";\n");}
+	;
 
 PrintText:
-	PrintStmt {
-		
-	}
-	| WriteStmt {
-		
-	}
+	PrintStmt
+	| WriteStmt
+	;
 
 PrintStmt:
-	PRINT_COMMAND FormatPrint PrintPossibilities {
-		//printf("\n\n\tformat: %s\n\n", $2);
-	}
+	PRINT_COMMAND FormatPrint PrintPossibilities
 	| PrintStmt COMMA PrintPossibilities
+	;
 
 FormatPrint:
 	TIMES COMMA
-
+	;
 
 WriteStmt:
-	WRITE_COMMAND FormatWrite PrintPossibilities {
-	}
+	WRITE_COMMAND FormatWrite PrintPossibilities 
 	| WriteStmt COMMA PrintPossibilities
-/*
+	;
+
 FormatWrite:
-	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS {
-		printf("\n\n\tformat: '''%s'''\n\n", $4);
-		//strcpy(format_str, "");
-	}
-	| OPEN_PARENS TIMES COMMA STRING CLOSE_PARENS {
-		printf("\n\n\tformat: '''%s'''\n\n", $4);
-		//strcpy(format_str, $4);
-	}
-*/
-FormatWrite:
-	FMT_ANY
-	| FMT_BEG Format FMT_END
+	FMT_ANY { default_format(); }
+	| FMT_BEG { custom_format(); } Format FMT_END
+	;
 
 Format:
-	FMT_TXT
-	| INT_NUM OPEN_PARENS Format CLOSE_PARENS {
-		printf("\n\n\tINT_NUM: %s\n\n", $1);
-	}
+	FMT_TXT { append_fmt($1); }
+	| INT_NUM { push_multiplier(atoi($1)); } OPEN_PARENS Format CLOSE_PARENS { pop_multiplier(); }
 	| Format COMMA Format
+	;
 
 PrintPossibilities:
 	STRING {
-		printf("printf(\"%s\\n\");\n", $1);
+		char temp[128];
+		sprintf(temp, "\"%s\"", $1);
+		append_content(temp);
+		if (is_fmt_any())
+			append_fmt("a");
 	}
 	| REAL_NUM {
-		printf("printf(\"%%lf\\n\", %s);\n", $1);
+		append_content($1);
+		if (is_fmt_any())
+			append_fmt("f");
 	}
 	| INT_NUM {
-		printf("printf(\"%%d\\n\", %s);\n", $1);
+		append_content($1);
+		if (is_fmt_any())
+			append_fmt("i");
 	}
 	| IDENTIFIER {
 		char type[4];
@@ -311,11 +306,21 @@ PrintPossibilities:
 
 		strcpy(var_name, $1);
 
-		if (get_var_type(&vars, var_name, type) < 0)
+		if (get_var_type(&vars, var_name, type) < 0) {
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
-		else
-			printf("printf(\"%%%s\\n\", %s);\n", type, var_name);
+			exit(EXIT_FAILURE);
+		}
+		else {
+			if (!strcmp(type, "d")) strcpy(type, "i");
+			else if (!strcmp(type, "lf")) strcpy(type, "f");
+			else yyerror("Syntax error: unrecognized variable type.\n");
+
+			if (is_fmt_any())
+				append_fmt(type);
+			append_content(var_name);
+		}
 	}
+	;
 
 ReadStmt:
 	READ_COMMAND FormatRead IDENTIFIER {
@@ -335,39 +340,50 @@ ReadStmt:
 		
 		strcpy(var_name, $3);
 
-		if (get_var_type(&vars, var_name, type) < 0)
+		if (get_var_type(&vars, var_name, type) < 0) {
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
+			exit(EXIT_FAILURE);
+		}
 		else
 			printf("scanf(\"%%%s\", &%s);\n", type, var_name);
 	}
+	;
 
 numbers_type:
 	INT_NUM {printf("%s", $1);}
 	| REAL_NUM {printf("%s", $1);}
+	;
 
 NumbersAssign:
 	IDENTIFIER EQUAL numbers_type
+	;
 
 ReadStmt:
 	READ_COMMAND FormatRead VarList
+	;
 
 FormatRead:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
+	;
 
 VarList:
 	IDENTIFIER {}
 	| VarList COMMA IDENTIFIER
+	;
 
 BeginProg:
 	PROGRAM_KEYWORD IDENTIFIER EOL IMPLICIT NONE {printf("int main(void) {\n");}
+	;
 
 EndProg:
 	END_KEYWORD PROGRAM_KEYWORD IDENTIFIER {printf("\nreturn 0;\n}\n");}
+	;
 
 %%
 
 int yyerror(char *s){
 	printf("%s\n", s);
+	exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[]){

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 
+
 struct var_node {
 	char type[4];
 	char name[128];
