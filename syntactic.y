@@ -151,7 +151,24 @@ MultipleScope:
 
 Repetition:
 	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
+	| SecondRepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
 
+SecondRepetitionFormat:
+	FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA 
+	RepetitionExpression {
+		printf(";%s <= %s;", for_counter, for_expression);
+		for_expression[0] = '\0';
+	} COMMA RepetitionExpression {
+		printf("%s += %s){\n", for_counter, for_expression);
+	}
+	| FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA 
+	RepetitionExpression {
+		printf(";%s <= %s;", for_counter, for_expression);
+		for_expression[0] = '\0';
+	} COMMA RepetitionExpression {
+		printf("%s += %s){\n", for_counter, for_expression);
+	}
+	
 RepetitionFormat:
 	FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA RepetitionExpression{
 		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
