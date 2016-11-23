@@ -5,7 +5,7 @@
 #include <math.h>
 #include "functions/symbol_table.c"
 #include "functions/power_elements.c"
-//#include "print_list.h"
+#include "print_list.h"
 #define ELEMENT_SIZE 100
 #define POWERS_USED 10
 
@@ -62,6 +62,9 @@ CommandList:
 	/* Empty */
 	| CommandList Command SEMICOLON
 	| CommandList Command EOL
+	| CommandList Command COMMENT EOL {
+		printf("//%s\n", $3);
+	}
 	;
 
 Command:
@@ -71,7 +74,7 @@ Command:
 	}
 	| BeginProg
 	| EndProg
-	| PrintText
+	| { clear_all(); } PrintText { print_all(); }
 	| ReadStmt
 	| Declaration
 	| Assignment
@@ -151,8 +154,23 @@ MultipleScope:
 
 Repetition:
 	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
-	| SecondRepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
+	;
 
+RepetitionFormat:
+	RepetitionPreamble
+	| RepetitionPreamble COMMA RepetitionExpression
+	;
+
+RepetitionPreamble:
+	FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA RepetitionExpression{
+		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
+	}
+	| FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA RepetitionExpression{
+		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
+	}
+	;
+
+/* {{{
 SecondRepetitionFormat:
 	FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA 
 	RepetitionExpression {
@@ -168,14 +186,8 @@ SecondRepetitionFormat:
 	} COMMA RepetitionExpression {
 		printf("%s += %s){\n", for_counter, for_expression);
 	}
-	
-RepetitionFormat:
-	FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA RepetitionExpression{
-		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
-	}
-	| FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA RepetitionExpression{
-		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
-	}
+	;
+}}}*/
 
 FirstPartRepetitionFormat:
 	DO_KEYWORD IDENTIFIER  {
@@ -183,6 +195,7 @@ FirstPartRepetitionFormat:
 	} EQUAL {
 		printf("for(%s = ", for_counter);
 	}
+	;
 
 RepetitionExpression:
 	INT_NUM {
@@ -252,7 +265,7 @@ Declaration:
 			type_declaration = REAL;
 			break;
 		default:
-			yyerror();
+			yyerror("Syntax error: erroneous variable declaration.\n");
 		}
 	}
 	;
@@ -314,32 +327,38 @@ FormatPrint:
 	;
 
 WriteStmt:
-	WRITE_COMMAND FormatWrite PrintPossibilities
+	WRITE_COMMAND FormatWrite PrintPossibilities 
 	| WriteStmt COMMA PrintPossibilities
 	;
 
 FormatWrite:
-	FMT_ANY
-	| FMT_BEG Format FMT_END
+	FMT_ANY { default_format(); }
+	| FMT_BEG { custom_format(); } Format FMT_END
 	;
 
 Format:
-	FMT_TXT
-	| INT_NUM OPEN_PARENS Format CLOSE_PARENS {
-			printf("\n\t%s\n", $1);
-	}
+	FMT_TXT { append_fmt($1); }
+	| INT_NUM { push_multiplier(atoi($1)); } OPEN_PARENS Format CLOSE_PARENS { pop_multiplier(); }
 	| Format COMMA Format
 	;
 
 PrintPossibilities:
 	STRING {
-		printf("printf(\"%s\\n\");\n", $1);
+		char temp[128];
+		sprintf(temp, "\"%s\"", $1);
+		append_content(temp);
+		if (is_fmt_any())
+			append_fmt("a");
 	}
 	| REAL_NUM {
-		printf("printf(\"%%lf\\n\", %s);\n", $1);
+		append_content($1);
+		if (is_fmt_any())
+			append_fmt("f");
 	}
 	| INT_NUM {
-		printf("printf(\"%%d\\n\", %s);\n", $1);
+		append_content($1);
+		if (is_fmt_any())
+			append_fmt("i");
 	}
 	| IDENTIFIER {
 		char type[4];
@@ -351,8 +370,15 @@ PrintPossibilities:
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
 			exit(EXIT_FAILURE);
 		}
-		else
-			printf("printf(\"%%%s\\n\", %s);\n", type, var_name);
+		else {
+			if (!strcmp(type, "d")) strcpy(type, "i");
+			else if (!strcmp(type, "lf")) strcpy(type, "f");
+			else yyerror("Syntax error: unrecognized variable type.\n");
+
+			if (is_fmt_any())
+				append_fmt(type);
+			append_content(var_name);
+		}
 	}
 	;
 
@@ -374,8 +400,10 @@ ReadStmt:
 		
 		strcpy(var_name, $3);
 
-		if (get_var_type(&vars, var_name, type) < 0)
+		if (get_var_type(&vars, var_name, type) < 0) {
 			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
+			exit(EXIT_FAILURE);
+		}
 		else
 			printf("scanf(\"%%%s\", &%s);\n", type, var_name);
 	}
@@ -421,6 +449,7 @@ EndProg:
 
 int yyerror(char *s){
 	printf("%s\n", s);
+	exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[]){
