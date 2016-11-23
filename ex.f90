@@ -1,8 +1,8 @@
 ! teste
 program exemplo
 	implicit none
-	integer :: x, i, m, t ; real :: z
-	real :: y, r1, r2 ; integer :: w, w1, w2, w3
+	integer :: x, i, m, n ; real :: z
+	real :: y, r1, r2, t, a, v, dt, x0 ; integer :: w, w1, w2, w3
 	integer o, o1, o23, pitagoras
 
 	read(*,*) x, i, o ! teste
@@ -21,10 +21,25 @@ program exemplo
 	x = (2 + 2) / y
 	x = (3 + 5) + (8 * 2)
 
-	do i = 1, N + 2, 8
- 		x = x0 + v*t + 0.5*a*t*t
-   		print *, t, x
-   		t = t + dt
+	do i = 1, N + 2, 1 + 2 * 5
+		x = x0 + v*t + 0.5*a*t*t
+		print *, t, x
+		t = t + dt
 	end do
+
+ 	if (x + 2 .eq. y + 19 + 5 .and. x .lt. 2) then
+ 		if (x .eq. 1) then
+ 			! oi
+ 			print *, 'oieieee'
+ 		else
+ 			m = 2
+ 		end if
+ 	else if (x .eq. 2) then
+ 		x = 2
+ 	else if (y .lt. 3) then
+ 		y = 4
+ 	else
+ 		z = 5
+ 	end if
 
 end program exemplo

@@ -153,10 +153,15 @@ MultipleScope:
 	;
 
 Repetition:
-	SecondRepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
-	| RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
-	
+	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
+	;
+
 RepetitionFormat:
+	RepetitionPreamble
+	| RepetitionPreamble COMMA RepetitionExpression
+	;
+
+RepetitionPreamble:
 	FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA RepetitionExpression{
 		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
 	}
@@ -165,6 +170,7 @@ RepetitionFormat:
 	}
 	;
 
+/* {{{
 SecondRepetitionFormat:
 	FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA 
 	RepetitionExpression {
@@ -181,7 +187,7 @@ SecondRepetitionFormat:
 		printf("%s += %s){\n", for_counter, for_expression);
 	}
 	;
-	
+}}}*/
 
 FirstPartRepetitionFormat:
 	DO_KEYWORD IDENTIFIER  {
@@ -189,6 +195,7 @@ FirstPartRepetitionFormat:
 	} EQUAL {
 		printf("for(%s = ", for_counter);
 	}
+	;
 
 RepetitionExpression:
 	INT_NUM {
