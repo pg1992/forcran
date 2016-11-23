@@ -74,7 +74,7 @@ Command:
 	}
 	| BeginProg
 	| EndProg
-	| { clear_all(); } PrintText { print_all(); }
+	| PrintText
 	| ReadStmt
 	| Declaration
 	| Assignment
@@ -146,8 +146,7 @@ MultipleScope:
 	| EOL MultipleScope
 	| EOL Assignment MultipleScope
 	| EOL Conditional MultipleScope
-	| EOL PrintStmt MultipleScope
-	| EOL WriteStmt MultipleScope
+	| EOL PrintText MultipleScope
 	| EOL ReadStmt MultipleScope
 	| EOL Repetition MultipleScope
 	;
@@ -157,37 +156,21 @@ Repetition:
 	;
 
 RepetitionFormat:
-	RepetitionPreamble
-	| RepetitionPreamble COMMA RepetitionExpression
+	RepetitionPreamble {
+		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
+	}
+	| RepetitionPreamble {
+		printf(";%s <= %s;", for_counter, for_expression);
+		*for_expression = 0;
+	} COMMA RepetitionExpression {
+		printf(" %s += %s ){\n", for_counter, for_expression);
+	}
 	;
 
 RepetitionPreamble:
-	FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA RepetitionExpression{
-		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
-	}
-	| FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA RepetitionExpression{
-		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
-	}
+	FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA RepetitionExpression
+	| FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA RepetitionExpression
 	;
-
-/* {{{
-SecondRepetitionFormat:
-	FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA 
-	RepetitionExpression {
-		printf(";%s <= %s;", for_counter, for_expression);
-		for_expression[0] = '\0';
-	} COMMA RepetitionExpression {
-		printf("%s += %s){\n", for_counter, for_expression);
-	}
-	| FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA 
-	RepetitionExpression {
-		printf(";%s <= %s;", for_counter, for_expression);
-		for_expression[0] = '\0';
-	} COMMA RepetitionExpression {
-		printf("%s += %s){\n", for_counter, for_expression);
-	}
-	;
-}}}*/
 
 FirstPartRepetitionFormat:
 	DO_KEYWORD IDENTIFIER  {
@@ -313,8 +296,8 @@ ExpressionAssign:
 	;
 
 PrintText:
-	PrintStmt
-	| WriteStmt
+	{ clear_all(); } PrintStmt { print_all(); }
+	| { clear_all(); } WriteStmt { print_all(); }
 	;
 
 PrintStmt:
