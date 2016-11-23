@@ -151,7 +151,24 @@ MultipleScope:
 
 Repetition:
 	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
+	| SecondRepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
 
+SecondRepetitionFormat:
+	FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA 
+	RepetitionExpression {
+		printf(";%s <= %s;", for_counter, for_expression);
+		for_expression[0] = '\0';
+	} COMMA RepetitionExpression {
+		printf("%s += %s){\n", for_counter, for_expression);
+	}
+	| FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA 
+	RepetitionExpression {
+		printf(";%s <= %s;", for_counter, for_expression);
+		for_expression[0] = '\0';
+	} COMMA RepetitionExpression {
+		printf("%s += %s){\n", for_counter, for_expression);
+	}
+	
 RepetitionFormat:
 	FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA RepetitionExpression{
 		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
@@ -267,11 +284,19 @@ Assignment:
 			char tmp[512];
 			strcpy(tmp, $1);
 			tmp[strlen(tmp)-1] = '\0';
+			printf("\n");
+	}
+	| ExpressionAssign COMMENT{
+		char tmp[512] = " ";
+		strcat(tmp, " //");
+		strcat(tmp, $2);
+		tmp[strlen(tmp)] = '\0';
+		printf("%s\n", tmp);
 	}
 	;
 
 ExpressionAssign:
-	IDENTIFIER EQUAL {printf("%s", $1);} Expression {printf(";\n");}
+	IDENTIFIER EQUAL {printf("%s", $1);} Expression {printf(";");}
 	;
 
 PrintText:

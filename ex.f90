@@ -15,13 +15,13 @@ program exemplo
 	y = 8.2
 	x = y + 3 + 1
 	x = y - 2
-	x = y * 2
+	x = y * 2 ! oi
 	x = 2 / 2
 	w = -(4 + 2)
 	x = (2 + 2) / y
 	x = (3 + 5) + (8 * 2)
 
-	do i = 1, N + 2
+	do i = 1, N + 2, 5
  		x = x0 + v*t + 0.5*a*t*t
    		print *, t, x
    		t = t + dt
