@@ -1,7 +1,7 @@
 ! teste
 program exemplo
 	implicit none
-	integer :: x, i, m ; real :: z
+	integer :: x, i, m, t ; real :: z
 	real :: y, r1, r2 ; integer :: w, w1, w2, w3
 	integer o, o1, o23, pitagoras
 
@@ -21,9 +21,9 @@ program exemplo
 	x = (2 + 2) / y
 	x = (3 + 5) + (8 * 2)
 
-	do i = 1, N
+	do i = 1, N + 2
  		x = x0 + v*t + 0.5*a*t*t
-   		print*, t, x
+   		print *, t, x
    		t = t + dt
 	end do
 

@@ -14,6 +14,10 @@ int recur_count = 0;
 power_elements power_e[POWERS_USED];
 int power_used=0;
 
+
+char for_counter[10];
+char for_expression[100] = "\0";
+
 %}
 
 %token EOL
@@ -72,51 +76,36 @@ Command:
 	| Declaration
 	| Assignment
 	| Conditional
+	| Repetition
 	;
 
 Conditional:
-	IfStmt ConditionScope END_KEYWORD IF_KEYWORD {
-		printf("}\n");
-	}
-	| IfStmt ConditionScope ElseStmt END_KEYWORD IF_KEYWORD {
-		//	printf("}\n");
-	}
-	| IfStmt ConditionScope ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
-	  {printf("}\n");}
-	| IfStmt ConditionScope ElseIfStmt END_KEYWORD IF_KEYWORD
-	  {printf("}\n");}
-	;
+	IfStmt ConditionScope END_KEYWORD IF_KEYWORD
+	| IfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	| IfStmt ElseIfStmt ElseStmt END_KEYWORD IF_KEYWORD
+	| IfStmt ElseIfStmt END_KEYWORD IF_KEYWORD
 
 IfStmt:
 	IF_KEYWORD OPEN_PARENS {printf("if(");} ConditionStmt CLOSE_PARENS THEN_KEYWORD {
 		printf("){\n");
-	}
+	} ConditionScope {printf("}\n");}
 
 ElseIfStmt:
-	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
-	ConditionScope
-	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS ConditionStmt CLOSE_PARENS THEN_KEYWORD 
-	ConditionScope ElseIfStmtRecur
+	ElseIfFormat
+	| ElseIfFormat ElseIfStmtRecur
 	;
 
 ElseIfStmtRecur: ElseStmt
-	| ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
-	{printf(" ){\n");} CLOSE_PARENS THEN_KEYWORD 
-	ConditionScope {printf("}\n");} ElseIfStmtRecur
-	ElseIfFormat ConditionScope
-	| ElseIfFormat ConditionScope ElseIfStmtRecur
-
-ElseIfStmtRecur:
-	ElseIfFormat ConditionScope {printf("}\n");}
+	| ElseIfFormat ElseIfStmtRecur
 	;
 
 ElseIfFormat:
 	ELSE_KEYWORD IF_KEYWORD OPEN_PARENS {printf("else if(");} ConditionStmt 
-	CLOSE_PARENS THEN_KEYWORD {printf("){\n");}
+	CLOSE_PARENS THEN_KEYWORD {printf("){\n");} ConditionScope {printf("}\n");}
 	;
 
 ElseStmt:
-	ELSE_KEYWORD {printf("else{\n");} ConditionScope {printf("}");}
+	ELSE_KEYWORD {printf("else{\n");} ConditionScope {printf("}\n");}
 	;
 
 
@@ -157,14 +146,50 @@ MultipleScope:
 	| EOL PrintStmt MultipleScope
 	| EOL WriteStmt MultipleScope
 	| EOL ReadStmt MultipleScope
+	| EOL Repetition MultipleScope
 	;
 
 Repetition:
-	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD
+	RepetitionFormat ConditionScope END_KEYWORD DO_KEYWORD {printf("}\n");}
 
 RepetitionFormat:
-	DO_KEYWORD ExpressionAssign COMMA Expression
-	| DO_KEYWORD ExpressionAssign COMMA Expression COMMA Expression
+	FirstPartRepetitionFormat INT_NUM {printf("%s", $2);} COMMA RepetitionExpression{
+		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
+	}
+	| FirstPartRepetitionFormat IDENTIFIER {printf("%s", $2);} COMMA RepetitionExpression{
+		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
+	}
+
+FirstPartRepetitionFormat:
+	DO_KEYWORD IDENTIFIER  {
+		strcpy(for_counter, $2);
+	} EQUAL {
+		printf("for(%s = ", for_counter);
+	}
+
+RepetitionExpression:
+	INT_NUM {
+		$$=$1;
+		strcat(for_expression, $1);
+		//printf("%s", $1);
+	}
+	| REAL_NUM{
+		$$=$1;
+		//printf("%s", $1);
+	}
+	| IDENTIFIER{
+		$$=$1;
+		strcat(for_expression, $1);
+		//printf("%s", $1);
+	}
+	| OPEN_PARENS {printf("(");} Expression CLOSE_PARENS {printf(")");}
+	| RepetitionExpression PLUS {strcat(for_expression, "+");} RepetitionExpression 
+	| RepetitionExpression MINUS {strcat(for_expression, "-");} RepetitionExpression
+	| RepetitionExpression TIMES {strcat(for_expression, "*");} RepetitionExpression
+	| RepetitionExpression DIVIDE {strcat(for_expression, "/");} RepetitionExpression
+	| MINUS {printf(" - ");} RepetitionExpression %prec NEG
+	;
+
 
 Declaration:
 	INTEGER_KEYWORD VAR_DEF_SEPARATOR IDENTIFIER {
@@ -332,8 +357,14 @@ ReadStmt:
 	;
 
 numbers_type:
-	INT_NUM {printf("%s", $1);}
-	| REAL_NUM {printf("%s", $1);}
+	INT_NUM {
+		$$ = $1;
+		printf("%s", $1);
+	}
+	| REAL_NUM {
+		$$ = $1;
+		printf("%s", $1);
+	}
 	;
 
 NumbersAssign:
