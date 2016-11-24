@@ -5,6 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "syntactic.tab.h"
+
+void to_lowercase(char *s)
+{
+	int i = 0;
+	for (i = 0; s[i]; i++)
+		s[i] |= ('A' <= s[i] && s[i] <= 'Z') ? (1 << 5) : 0;
+}
 %}
 
 WHITE [\t ]
@@ -94,6 +101,7 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 	return INT_NUM;
 }
 [a-z][a-zA-Z0-9_]* {
+	to_lowercase(yytext);
 	yylval = yytext;
 	return IDENTIFIER;
 }
