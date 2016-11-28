@@ -38,6 +38,7 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 ")" return CLOSE_PARENS;
 "{" return OPEN_BRACKET;
 "}" return CLOSE_BRACKET;
+"parameter" return PARAMETER;
 "::" return VAR_DEF_SEPARATOR;
 "," return COMMA;
 ";" return SEMICOLON;

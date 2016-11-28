@@ -335,6 +335,7 @@ PrintPossibilities:
 	}
 	| REAL_NUM {
 		append_content($1);
+
 		if (is_fmt_any())
 			append_fmt("f");
 	}
@@ -413,6 +414,7 @@ ReadStmt:
 
 FormatRead:
 	OPEN_PARENS TIMES COMMA TIMES CLOSE_PARENS
+	| TIMES COMMA
 	;
 
 VarList:

@@ -90,9 +90,9 @@ void convert_fmt_f2c(char *str, struct format sfmt)
 		break;
 	}
 
-	if (sfmt.whole < 0) sprintf(str, "%%%s", type);
-	else if(sfmt.frac < 0) sprintf(str, "%%%d%s", sfmt.whole, type);
-	else sprintf(str, "%%%d.%d%s", sfmt.whole, sfmt.frac, type);
+	if (sfmt.whole < 0) sprintf(str, "%%%s ", type);
+	else if(sfmt.frac < 0) sprintf(str, "%%%d%s ", sfmt.whole, type);
+	else sprintf(str, "%%%d.%d%s ", sfmt.whole, sfmt.frac, type);
 }
 
 void strcat_n(char *dest, char *src, int n)
