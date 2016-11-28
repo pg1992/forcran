@@ -4,6 +4,8 @@ DBG=
 all: run
 
 run: forcran
+	gcc functions/error_messages.c -o run
+	./run
 	@echo -e "Arquivo .f90:\n"
 	@cat ex.f90
 	@echo -e "\nArquivo .c gerado:\n"

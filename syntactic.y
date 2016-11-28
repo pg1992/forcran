@@ -13,6 +13,7 @@ enum {REAL, INT} type_declaration;
 int recur_count = 0;
 power_elements power_e[POWERS_USED];
 int power_used=0;
+int line_number=1;
 
 %}
 
@@ -55,13 +56,14 @@ int power_used=0;
 
 CommandList:
 	/* Empty */
-	| CommandList Command SEMICOLON
-	| CommandList Command EOL
+	| CommandList Command SEMICOLON { line_number++; }
+	| CommandList Command EOL { line_number++; }
 
 Command:
 	/* Empty */
 	| COMMENT {
 		printf("//%s\n", $1);
+		line_number++;		
 	}
 	| BeginProg
 	| EndProg
@@ -253,7 +255,7 @@ ExpressionAssign:
 
 PrintText:
 	PrintStmt {
-		
+
 	}
 	| WriteStmt {
 		
@@ -261,13 +263,12 @@ PrintText:
 
 PrintStmt:
 	PRINT_COMMAND FormatPrint PrintPossibilities {
-		//printf("\n\n\tformat: %s\n\n", $2);
+
 	}
 	| PrintStmt COMMA PrintPossibilities
 
 FormatPrint:
 	TIMES COMMA
-
 
 WriteStmt:
 	WRITE_COMMAND FormatWrite PrintPossibilities {
@@ -311,8 +312,9 @@ PrintPossibilities:
 
 		strcpy(var_name, $1);
 
-		if (get_var_type(&vars, var_name, type) < 0)
-			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
+		if (get_var_type(&vars, var_name, type) < 0) {
+			check_variable(var_name);
+			}
 		else
 			printf("printf(\"%%%s\\n\", %s);\n", type, var_name);
 	}
@@ -324,8 +326,9 @@ ReadStmt:
 
 		strcpy(var_name, $3);
 
-		if (get_var_type(&vars, var_name, type) < 0)
-			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
+		if (get_var_type(&vars, var_name, type) < 0) {
+			check_variable(var_name);
+		}
 		else
 			printf("scanf(\"%%%s\", &%s);\n", type, var_name);
 	}
@@ -335,8 +338,9 @@ ReadStmt:
 		
 		strcpy(var_name, $3);
 
-		if (get_var_type(&vars, var_name, type) < 0)
-			fprintf(stderr, "Syntax error: couldn't find variable %s.\n", var_name);
+		if (get_var_type(&vars, var_name, type) < 0) {
+			check_variable(var_name);	
+		}
 		else
 			printf("scanf(\"%%%s\", &%s);\n", type, var_name);
 	}
@@ -366,8 +370,10 @@ EndProg:
 
 %%
 
-int yyerror(char *s){
-	printf("%s\n", s);
+int yyerror(char *error_message, char *variable){
+	
+	printf("Error in line %d\n", line_number);
+	printf("%s %s\n\n", error_message, variable);
 }
 
 int main(int argc, char *argv[]){
