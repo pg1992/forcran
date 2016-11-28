@@ -3,6 +3,8 @@ File to get and use math functions
 First get elements of power expression
 */
 
+
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>

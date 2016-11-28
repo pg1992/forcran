@@ -142,6 +142,23 @@ void check_print_format() {
 	}
 }
 
+void check_read_format() {
+	int i=0;
+	for(i=0; (number_words-1); i++) {
+		if (strcmp(list[i].word, "rea") == 0 || strcmp(list[i].word, "red") == 0 
+				|| strcmp(list[i].word, "raed") == 0 || strcmp(list[i].word, "rad") == 0) {
+			printf("Error in line %d\n", list[i].line);
+			printf("Error: %s format should be 'read'\n\n", list[i].word);
+		}
+		else if (strcmp(list[i].word, "erad") == 0 || strcmp(list[i].word, "rae") == 0 
+				|| strcmp(list[i].word, "readd") == 0 || strcmp(list[i].word, "ead") == 0) {
+			printf("Error in line %d\n", list[i].line);
+			printf("Error: '%s' format should be 'read'\n\n", list[i].word);
+		}
+		if (i > number_words) { break; }
+	}
+}
+
 void check_write_format() {
 	int i=0;
 	for(i=0; (number_words-1); i++) {
@@ -203,6 +220,7 @@ void call_check_validations() {
 	check_name_of_program();
 	check_print_format();
 	check_write_format();
+	check_read_format();
 	check_end_format();
 	check_then();
 	check_presence_end();

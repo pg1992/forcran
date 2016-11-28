@@ -5,6 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "syntactic.tab.h"
+
+void to_lowercase(char *s)
+{
+	int i = 0;
+	for (i = 0; s[i]; i++)
+		s[i] |= ('A' <= s[i] && s[i] <= 'Z') ? (1 << 5) : 0;
+}
 %}
 
 WHITE [\t ]
@@ -41,6 +48,7 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 "-" return MINUS;
 "/" return DIVIDE;
 "=" return EQUAL;
+"do" return DO_KEYWORD;
 "then" return THEN_KEYWORD;
 "if" return IF_KEYWORD;
 "else" return ELSE_KEYWORD;
@@ -65,23 +73,20 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 "none" return NONE;
 "parameter" return PARAMETER;
 "print" return PRINT_COMMAND;
-	/********************************************************************************/
-	/******** Write section ********/
-"write" {
-	BEGIN(WRITE_STATE);
-	printf("\n\n\tWRITE_COMMAND\n\n");
-	return WRITE_COMMAND;
-}
+
+"write" BEGIN(WRITE_STATE); return WRITE_COMMAND;
 <WRITE_STATE>{
 "(*,*)" BEGIN(INITIAL); return(FMT_ANY);
 "(*,'(" BEGIN(FMT_STR); return(FMT_BEG);
 <FMT_STR>{
 ")')" BEGIN(INITIAL); return(FMT_END);
-({NUMBER})?(e|es|l|a|x|t|i|f)({NUMBER}("."{NUMBER})?)? printf("\n\n\tText found: %s\n\n", yytext); return(FMT_TXT);
+({NUMBER})?(e|es|l|a|x|t|i|f)({NUMBER}("."{NUMBER})?)? {
+	yylval = yytext;
+	return(FMT_TXT);
 }
 }
-	/******* End of Write section *****/
-	/********************************************************************************/
+}
+
 "read" return READ_COMMAND;
 "real" return REAL_KEYWORD;
 "program" return PROGRAM_KEYWORD;
@@ -96,6 +101,7 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 	return INT_NUM;
 }
 [a-z][a-zA-Z0-9_]* {
+	to_lowercase(yytext);
 	yylval = yytext;
 	return IDENTIFIER;
 }

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 
+
 struct var_node {
 	char type[4];
 	char name[128];
@@ -15,6 +16,10 @@ struct varlist {
 	struct var_node *head;
 } vars = {0, NULL};
 
+typedef struct expression_list{
+	struct expression_list	*child1, *child2;
+	struct expression_list	*child3, *child4, *child5;
+} List;
 
 void
 add_var (
@@ -57,4 +62,17 @@ get_var_type (
 	strcpy(this_type, cur->type);
 
 	return 0;
+}
+
+List* new_list(List* expression_list1, 
+				List* expression_list2){
+
+  struct expression_list *t;
+  t = (struct expression_list *)malloc(sizeof(struct expression_list));
+  t->child1 = expression_list1;
+  t->child2 = expression_list2;
+  t->child3 = NULL;t->child4 = NULL;t->child5 = NULL;
+
+  return (t);
+
 }
