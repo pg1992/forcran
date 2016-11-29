@@ -25,11 +25,17 @@ Atualmente estamos usando as versões:
 Bison 3.0.4
 Flex 2.6.0
 ```
-Em seguida basta copiar o projeto no diretório desejado e entrar no projeto.
+Em seguida coloque seu código em fortran no diretório do compilador ForCran, com o nome ex.f90
 Para compilar seu código em C digite:
 ```
-COLOCAR OS COMANDOS DO TERMINAL
+make
 ```
+Para compilar novamente digite
+```
+make clear
+make
+```
+Seu código em C vai ser salvo no arquivo out.c na pasta ForCran.
 ## Contribuições
 Para contribuir com o ForCran faça um fork do projeto, aplique as mudanças desejadas e em seguida envie um pull request para a branch contribution com detalhes explicando sua colaboração e qual o obejtivo da mesma. Não esqueça de testar todos os métodos que você criou. Recomandamos que siga o template abaixo para funções tipo int, float, double e void (transforme a void em int).
 ### Criando testes
