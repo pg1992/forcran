@@ -160,12 +160,14 @@ Repetition:
 RepetitionFormat:
 	RepetitionPreamble {
 		printf(";%s <= %s; %s++){\n", for_counter, for_expression, for_counter);
+		for_expression[0] = '\0';
 	}
 	| RepetitionPreamble {
 		printf(";%s <= %s;", for_counter, for_expression);
 		*for_expression = 0;
 	} COMMA RepetitionExpression {
 		printf(" %s += %s ){\n", for_counter, for_expression);
+		for_expression[0] = '\0';
 	}
 	;
 
