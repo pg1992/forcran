@@ -16,43 +16,52 @@ struct list_ {
 
 struct list_ list[1200];
 
-char file[] = "ex.f90"; 
+//char file_name[] = "ex.f90"; 
 int number_words=0;
 
-void check_program_format() {
-	int i=0;	
+int check_program_format() {
+	int i=0;
+	int r=0;
 	for(i=0; (number_words-1); i++) {
 		if (strcmp(list[i].word, "prgram") == 0 || strcmp(list[i].word, "progran") == 0 || strcmp(list[i].word, "progra") == 0) {
 			printf("Error in line %d\n", list[i].line);
 			printf("Error: program format is not correct\n\n");
+			r=1;
 		}
 		else if (strcmp(list[i].word, "progam") == 0 || strcmp(list[i].word, "progrm") == 0 || strcmp(list[i].word, "pogram") == 0) {
 			printf("Error in line %d\n", list[i].line);
 			printf("Error: program format is not correct\n\n");
+			r=1;
 		}
 		else if (strcmp(list[i].word, "prog") == 0 || strcmp(list[i].word, "prograam") == 0 || strcmp(list[i].word, "pgram") == 0) {
 			printf("Error in line %d\n", list[i].line);
 			printf("Error: program format is not correct\n\n");
+			r=1;
 		}
 		else {}
 		if (i > number_words) { break; }
 	}
+	return r;
 }
 
-void check_end_format() {	
+int check_end_format() {	
 	int i=0;
+	int r=0;
 	for(i=0; (number_words-1); i++) {
 		if (strcmp(list[i].word, "en") == 0 || strcmp(list[i].word, "edn") == 0
 		 || strcmp(list[i].word, "ed") == 0 || strcmp(list[i].word, "nd") == 0 ) {
 			printf("Error in line %d\n", list[i].line);
 			printf("Error: 'end' format is not correct\n\n");
+			r=1;
 			break;			
 		}
 		if (i > number_words) { break; }
-	}	
+	}
+	return r;	
 }
 
-void check_name_of_program() {
+int check_name_of_program() {
+	int r=0;
 	int i=0, count_program=0;
 	char name_of_program[15];
 	for(i=0; (number_words-1); i++) {
@@ -72,6 +81,7 @@ void check_name_of_program() {
 				if (strcmp(list[i+1].word, name_of_program) != 0) {
 					printf("Error in line %d\n", list[i].line);
 					printf("Error: name of program is difference in 'end program %s'\n\n", list[i+1].word);
+					r=1;
 					count_program = 0;
 					break;
 				}
@@ -79,10 +89,12 @@ void check_name_of_program() {
 		}
 		if (i > number_words) { break; }
 	}
+	return r;
 }
 
-void check_presence_end() {
+int check_presence_end() {
 	int i=0;
+	int r=0;
 	int count_program=0;
 	for(i=0; (number_words-1); i++) {
 		if (strcmp(list[i].word, "program") == 0) {
@@ -91,15 +103,18 @@ void check_presence_end() {
 				if (strcmp(list[i-1].word, "end") != 0) {
 					printf("Error in line %d\n", list[i].line);
 					printf("Error: missing 'end' before program\n\n");
+					r=1;
 				}
 			}
 		}
 		if (i > number_words) { break; }
 	}
+	return r;
 }
 
-void check_then() {
+int check_then() {
 	int i=0; int line=0;
+	int r=0;
 	int found_then=0, found_if=0;
 	for(i=0; (number_words-1); i++) {
 		if (strcmp(list[i].word, "if") == 0) {
@@ -118,65 +133,79 @@ void check_then() {
 			if (found_then == 0) {
 				printf("Error in line %d\n", list[i].line-1);
 				printf("Error: missing 'then' after if\n\n");
+				r=1;
 				break;
 			}
 		}
 		if (i > number_words) { break; }
 	}
+	return r;
 }
 
-void check_print_format() {
+int check_print_format() {
 	int i=0;
+	int r=0;
 	for(i=0; (number_words-1); i++) {
 		if (strcmp(list[i].word, "prit") == 0 || strcmp(list[i].word, "prin") == 0 
 				|| strcmp(list[i].word, "prt") == 0 || strcmp(list[i].word, "pint") == 0) {
 			printf("Error in line %d\n", list[i].line);
 			printf("Error: %s format should be 'print'\n\n", list[i].word);
+			r=1;
 		}
 		else if (strcmp(list[i].word, "prnt") == 0 || strcmp(list[i].word, "pirnt") == 0 
 				|| strcmp(list[i].word, "pritn") == 0 || strcmp(list[i].word, "prnit") == 0) {
 			printf("Error in line %d\n", list[i].line);
 			printf("Error: '%s' format should be 'print'\n\n", list[i].word);
+			r=1;
 		}
 		if (i > number_words) { break; }
 	}
+	return r;
 }
 
-void check_read_format() {
+int check_read_format() {
 	int i=0;
+	int r=0;
 	for(i=0; (number_words-1); i++) {
 		if (strcmp(list[i].word, "rea") == 0 || strcmp(list[i].word, "red") == 0 
 				|| strcmp(list[i].word, "raed") == 0 || strcmp(list[i].word, "rad") == 0) {
 			printf("Error in line %d\n", list[i].line);
 			printf("Error: %s format should be 'read'\n\n", list[i].word);
+			r=1;
 		}
 		else if (strcmp(list[i].word, "erad") == 0 || strcmp(list[i].word, "rae") == 0 
 				|| strcmp(list[i].word, "readd") == 0 || strcmp(list[i].word, "ead") == 0) {
 			printf("Error in line %d\n", list[i].line);
 			printf("Error: '%s' format should be 'read'\n\n", list[i].word);
+			r=1;
 		}
 		if (i > number_words) { break; }
 	}
+	return r;
 }
 
-void check_write_format() {
+int check_write_format() {
 	int i=0;
+	int r=0;
 	for(i=0; (number_words-1); i++) {
 		if (strcmp(list[i].word, "wite") == 0 || strcmp(list[i].word, "writ") == 0 
 				|| strcmp(list[i].word, "wrie") == 0 || strcmp(list[i].word, "rite") == 0) {
 			printf("Error in line %d\n", list[i].line);
 			printf("Error: %s format should be 'write'\n\n", list[i].word);
+			r=1;
 		}
 		else if (strcmp(list[i].word, "wirte") == 0 || strcmp(list[i].word, "wriet") == 0 
 				|| strcmp(list[i].word, "rwite") == 0 || strcmp(list[i].word, "wrtie") == 0) {
 			printf("Error in line %d\n", list[i].line);
 			printf("Error: '%s' format should be 'write'\n\n", list[i].word);
+			r=1;
 		}
 		if (i > number_words) { break; }
 	}
+	return r;
 }
 
-void save_words() {
+void save_words(char *file) {
 	fortran_program = fopen(file, "r");
 	if (fortran_program == NULL) {
 		printf("Error: This fortran program '%s' is empty\n", file);
@@ -211,26 +240,24 @@ void save_words() {
 	}
 }
 
-
 void call_check_validations() {
 
-	save_words();
+	int r=0;
 	printf("\n");
-	check_program_format();
-	check_name_of_program();
-	check_print_format();
-	check_write_format();
-	check_read_format();
-	check_end_format();
-	check_then();
-	check_presence_end();
+	r = check_program_format();
+	r=0;
+	r = check_name_of_program();
+	r=0;
+	r = check_print_format();
+	r=0;
+	r = check_write_format();
+	r=0;
+	r = check_read_format();
+	r=0;
+	r = check_end_format();
+	r=0;
+	r = check_then();
+	r=0;
+	r = check_presence_end();
 	printf("\n");
-}
-
-int main() {
-	
-	call_check_validations();
-	//printf("numero de palavras = %d\n", number_words);
-	return 0;
-
 }
