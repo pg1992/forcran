@@ -6,14 +6,11 @@
 #include "functions/symbol_table.c"
 #include "print_list.h"
 #define ELEMENT_SIZE 100
-#define POWERS_USED 10
+
 
 enum {REAL, INT} type_declaration;
 int recur_count = 0;
-power_elements power_e[POWERS_USED];
-int power_used=0;
 int line_number=1;
-
 
 char for_counter[10];
 char for_expression[100] = "\0";
@@ -270,12 +267,6 @@ Expression:
 	| Expression TIMES {printf(" * ");} Expression
 	| Expression DIVIDE {printf(" / ");} Expression
 	| MINUS {printf(" - ");} Expression %prec NEG
-	| Expression POWER Expression {
-		strcpy(power_e[power_used].b, get_base($1));
-		strcpy(power_e[power_used].p, get_potency($1));
-		printf("pow(%s,%s);\n", power_e[power_used].b, power_e[power_used].p);
-		power_used++;
-	}
 	;
 
 Assignment:

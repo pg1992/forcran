@@ -25,4 +25,3 @@ lex.yy.c: lexical.l syntactic.tab.c
  
 clear:
 	rm forcran syntactic.tab.c syntactic.tab.h lex.yy.c out.c syntactic.output
-
