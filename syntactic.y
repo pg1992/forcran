@@ -4,7 +4,6 @@
 #include <string.h>
 #include <math.h>
 #include "functions/symbol_table.c"
-#include "functions/power_elements.c"
 #include "print_list.h"
 #define ELEMENT_SIZE 100
 #define POWERS_USED 10
