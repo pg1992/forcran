@@ -1,7 +1,7 @@
 TSTFLD = test/
 
 DBG=
-all: run
+all: forcran
 
 run: forcran
 	gcc functions/error_messages.c -o run
@@ -16,13 +16,16 @@ tests:
 	./$(TSTFLD)run
 
 forcran: lex.yy.c syntactic.tab.c src/print_list.c lib/print_list.h
-	gcc -o forcran -I./lib src/print_list.c syntactic.tab.c lex.yy.c -lm -lfl
+	@echo Compilando o FORCRAN
+	@gcc -o forcran -I./lib src/print_list.c syntactic.tab.c lex.yy.c -lm -lfl 2>/dev/null
 
 syntactic.tab.c: syntactic.y
-	bison -d syntactic.y --report=state
+	@echo Compilando o sintático
+	@bison -d syntactic.y --report=state 2>/dev/null
 
 lex.yy.c: lexical.l syntactic.tab.c
-	flex lexical.l
+	@echo Compilando o léxico
+	@flex lexical.l
  
 clear:
 	rm forcran syntactic.tab.c syntactic.tab.h lex.yy.c out.c syntactic.output

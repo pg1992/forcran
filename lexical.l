@@ -20,7 +20,11 @@ DIGIT [0-9]
 NUMBER [0-9]+
 SIGN ("+"|"-")?
 INTEGER {SIGN}{NUMBER}
-REAL {SIGN}{NUMBER}+"."{NUMBER}?
+REAL1 {SIGN}{NUMBER}"."{NUMBER}((e|E){INTEGER})?
+REAL2 {SIGN}"."{NUMBER}((e|E){INTEGER})?
+REAL3 {SIGN}{NUMBER}"."((e|E){INTEGER})?
+REAL4 {SIGN}{NUMBER}((e|E){INTEGER})
+REAL ({REAL1}|{REAL2}|{REAL3}|{REAL4})
 
 %s WRITE_STATE FMT_STR
 
@@ -72,7 +76,6 @@ REAL {SIGN}{NUMBER}+"."{NUMBER}?
 }
 "implicit" return IMPLICIT;
 "none" return NONE;
-"parameter" return PARAMETER;
 "print" return PRINT_COMMAND;
 
 "write" BEGIN(WRITE_STATE); return WRITE_COMMAND;

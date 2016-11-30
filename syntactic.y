@@ -15,7 +15,6 @@ power_elements power_e[POWERS_USED];
 int power_used=0;
 int line_number=1;
 
-
 char for_counter[10];
 char for_expression[100] = "\0";
 
