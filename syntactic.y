@@ -12,7 +12,7 @@ enum {REAL, INT} type_declaration;
 int recur_count = 0;
 int line_number=1;
 
-char for_counter[10];
+char for_counter[20];
 char for_expression[100] = "\0";
 
 %}
